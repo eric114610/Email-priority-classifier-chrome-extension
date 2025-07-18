@@ -20,14 +20,6 @@ setTimeout(() => {
         UserEmail = result.UserEmail;
         console.log('UserEmail from storage for popup:', UserEmail, result.validPopup);
 
-        let applyBtn = document.getElementById("applyPromptBtn");
-        applyBtn.disabled = !result.validPopup;
-        applyBtn.textContent = result.validPopup ? "Apply" : "WAITING";
-
-        let manageBtn = document.getElementById("manageBtn");
-        manageBtn.disabled = !result.validPopup;
-        manageBtn.textContent = result.validPopup ? "Manage" : "WAITING";
-
         setInterval(() => {
             fetch("http://localhost:8000/get_stats", {
                 method: "POST",
@@ -47,6 +39,14 @@ setTimeout(() => {
               console.error("Error fetching User data from popup:", err);
             });  
         }, 4000);
+
+        let applyBtn = document.getElementById("applyPromptBtn");
+        applyBtn.disabled = !result.validPopup;
+        applyBtn.textContent = result.validPopup ? "Apply" : "WAITING";
+
+        let manageBtn = document.getElementById("manageBtn");
+        manageBtn.disabled = !result.validPopup;
+        manageBtn.textContent = result.validPopup ? "Manage" : "WAITING";
     });
 
 }, 2000);
@@ -99,6 +99,8 @@ document.getElementById("applyRerun").addEventListener("click", () => {
     const promptValue = document.getElementById("promptInput").value;
     console.log("apply with re-run.", promptValue);
 
+    document.getElementById("loadingOverlay").classList.remove("hidden");
+
     let UserEmail = '';
     chrome.storage.local.get(['UserEmail'], (result) => {
         UserEmail = result.UserEmail;
@@ -115,7 +117,16 @@ document.getElementById("applyRerun").addEventListener("click", () => {
         .then((data) => {
 
           console.log("Response received from popup:", data);
+          document.getElementById("loadingOverlay").classList.add("hidden");
           document.getElementById("confirmationModal").classList.add("hidden");
+
+          chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+              const currentTab = tabs[0];
+              if (currentTab && currentTab.id) {
+                  chrome.tabs.reload(currentTab.id);
+                  window.close();
+              }
+          });
         })
         .catch((err) => {
           console.error("Error applying prompt from popup:", err);

@@ -1,15 +1,15 @@
 .optional-reply-color {
-    color: #2fe905 !important;
+    color: #90caf9 !important;
 }
 .notable-reply-color {
-    color: #006aff !important;
+    color: #4db6ac !important;
 }
 .important-reply-color {
-    color: #d8f30b !important;
+    color: #ffd54f !important;
 }
 .urgent-reply-color {
-    color: #ffaa00 !important;
+    color: #ef9a9a !important;
 }
 .crucial-reply-color {
-    color: #f80202 !important;
+    color: #ab47bc !important;
 }
