@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Email Priority Instant Classifier (EPIC)</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 16px;
+      width: 380px;
+      background: linear-gradient(to bottom right, #e3f2fd, #fce4ec);
+      color: #333;
+    }
+
+    h1 {
+      font-size: 1.6em;
+      margin-bottom: 16px;
+      text-align: center;
+      color: #1976d2;
+    }
+
+    .section {
+      margin-bottom: 20px;
+      padding: 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.85);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .section-title {
+      font-weight: bold;
+      font-size: 1.1em;
+      margin-bottom: 12px;
+      color: #444;
+    }
+
+    .flex-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .intro-text {
+      flex: 1;
+      font-size: 0.95em;
+      line-height: 1.5;
+      color: #444;
+    }
+
+    .btn {
+      padding: 6px 14px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(145deg, #1976d2, #42a5f5);
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.9em;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      background: linear-gradient(145deg, #1565c0, #2196f3);
+    }
+
+    .progress-bar-bg {
+      flex: 1;
+      height: 12px;
+      background: #e0e0e0;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #66bb6a, #ffa726);
+      transition: width 0.4s ease;
+    }
+
+    #recordCount {
+      font-size: 0.9em;
+      color: #444;
+      min-width: 60px;
+      text-align: right;
+    }
+
+    .category-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .category-list li {
+      padding: 10px 14px;
+      margin-bottom: 10px;
+      border-radius: 12px;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 500;
+      font-size: 0.95em;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+    }
+
+    #cat-optional    { background: #90caf9; }
+    #cat-notable     { background: #4db6ac; }
+    #cat-important   { background: #ffd54f; color: #333; }
+    #cat-urgent      { background: #ef9a9a; }
+    #cat-critical     { background: #ab47bc; }
+
+    .cat-value {
+      font-weight: bold;
+    }
+
+    .prompt-input {
+      width: 100%;
+      min-height: 50px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 0.95em;
+      margin-top: 6px;
+      resize: vertical;
+      background: #fff;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .word-count {
+      font-size: 0.85em;
+      color: #666;
+      margin-top: 6px;
+    }
+
+    .bottom-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+
+    .modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 24px;
+  border-radius: 8px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.modal-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.hidden {
+  display: none;
+}
+
+  </style>
+</head>
+<body>
+  <h1>Email Priority Instant Classifier (EPIC)</h1>
+
+
+  <div class="section">
+    <div class="section-title">About</div>
+    <div class="flex-row">
+      <div class="intro-text">
+        <div>Email Priority Instant Classifier (EPIC) helps you classify emails using AI.</div>
+        <div>help you decide which emails to prioritize and which can wait.</div>
+      </div>
+      <button class="btn" id="detailsBtn">Details</button>
+    </div>
+  </div>
+
+
+  <div class="section">
+    <div class="section-title">Record Usage</div>
+    <div class="flex-row">
+      <div class="progress-bar-bg">
+        <div class="progress-bar" id="recordBar" style="width: 0%"></div>
+      </div>
+      <span id="recordCount">0/200</span>
+      <button class="btn" id="manageBtn" disabled>WAITING</button>
+    </div>
+  </div>
+
+
+  <div class="section">
+    <div class="section-title">Categories</div>
+    <ul class="category-list" id="categoryList">
+      <li id="cat-optional">Optional <span class="cat-value">0</span></li>
+      <li id="cat-notable">Notable <span class="cat-value">0</span></li>
+      <li id="cat-important">Important <span class="cat-value">0</span></li>
+      <li id="cat-urgent">Urgent <span class="cat-value">0</span></li>
+      <li id="cat-critical">Critical <span class="cat-value">0</span></li>
+    </ul>
+  </div>
+
+
+  <div class="section">
+    <div class="section-title">Customize Prompt</div>
+    <div>Set your own prompt for the backend AI (max 100 words):</div>
+    <textarea class="prompt-input" id="promptInput" maxlength="600"></textarea>
+    <div class="bottom-controls">
+      <span class="word-count" id="wordCount">0/100 words</span>
+      <button class="btn" id="applyPromptBtn" disabled>WAITING</button>
+    </div>
+  </div>
+
+
+  <div id="confirmationModal" class="modal hidden">
+    <div class="modal-content">
+      <p>Your custom prompt is going to be applied.</p>
+      <p>Would you like to re-run all stored mails?</p>
+      <div class="modal-buttons">
+        <button class="btn" id="applyRerun">Apply with re-run</button>
+        <button class="btn" id="applyNoRerun">Apply without re-run </button>
+        <button class="btn" id="cancelModalBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

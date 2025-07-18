@@ -1,0 +1,15 @@
+.optional-reply-color {
+    color: #2fe905 !important;
+}
+.notable-reply-color {
+    color: #006aff !important;
+}
+.important-reply-color {
+    color: #d8f30b !important;
+}
+.urgent-reply-color {
+    color: #ffaa00 !important;
+}
+.crucial-reply-color {
+    color: #f80202 !important;
+}
