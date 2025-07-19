@@ -5,6 +5,7 @@ class BackendInput(BaseModel):
     SenderName: str
     SenderSubject: str
     SenderPreview: str
+    EmailDate: str
     UserEmail: str
 
 class ThreadInput(BaseModel):
@@ -12,6 +13,7 @@ class ThreadInput(BaseModel):
     Name: str
     Subject: str
     Preview: str
+    Date: str
 
 class UserData(BaseModel):
     Email: str

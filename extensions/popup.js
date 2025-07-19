@@ -42,7 +42,7 @@ setTimeout(() => {
               let manageBtn = document.getElementById("manageBtn");
               manageBtn.disabled = !result.validPopup;
               manageBtn.textContent = result.validPopup ? "Manage" : "WAITING";
-              
+
             })
             .catch((err) => {
               console.error("Error fetching User data from popup:", err);
@@ -102,6 +102,15 @@ document.getElementById("applyRerun").addEventListener("click", () => {
     console.log("apply with re-run.", promptValue);
 
     document.getElementById("loadingOverlay").classList.remove("hidden");
+
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]?.id) {
+        chrome.tabs.sendMessage(tabs[0].id, {
+          Type: "PAUSE_CONTENT_SCRIPT",
+          Pause: true
+        });
+      }
+    });
 
     let UserEmail = '';
     chrome.storage.local.get(['UserEmail'], (result) => {

@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
+import time
 from app.gemini_client import generate_mail_class
 from app.db import save_thread, query_thread, get_stats, get_user_db, get_prompt, save_prompt, reset_stats
 from app.schemas import BackendInput, ThreadInput, UserData, PromptInput
@@ -18,11 +19,12 @@ async def get_mail_class(input: BackendInput):
         Email=input.SenderEmail,
         Name=input.SenderName,
         Subject=input.SenderSubject,
-        Preview=input.SenderPreview
+        Preview=input.SenderPreview,
+        Date=input.EmailDate
     )
     record = query_thread(threadInput, input.UserEmail)
     if record:
-        print("Record found in database, returning MailClass.", input.SenderEmail, input.SenderSubject, input.SenderPreview)
+        print("Record found in database, returning MailClass.", input.SenderEmail, input.SenderSubject, input.SenderPreview, input.EmailDate)
         return {"MailClass": record["MailClass"]}
     
     print("No record found, generating summary.")
@@ -64,16 +66,23 @@ async def apply_custom_prompt(input: PromptInput):
                 print(f"Deleted all stored mails for {input.UserEmail} before re-running.")
                 reset_stats(input.UserEmail)
 
-            for record in records:
+
+            for index, record in enumerate(records, start=1):  # start=1 so index starts at 1
                 threadInput = ThreadInput(
                     Email=record['Email'],
                     Name=record['Name'],
                     Subject=record['Subject'],
-                    Preview=record['Preview']
+                    Preview=record['Preview'],
+                    Date=record['Date']
                 )
                 print(f"Re-running mail: {threadInput.Name}")
                 MailClass = generate_mail_class(threadInput, input.CustomPrompt)
                 save_thread(threadInput, input.UserEmail, MailClass)
+
+                if index % 5 == 0 and index != len(records):
+                    print("Waiting for 15 seconds before continuing...")
+                    time.sleep(15)
+
             print(f"Re-ran all stored mails for {input.UserEmail}.")
     else:
         print(f"No changes to custom prompt for {input.UserEmail}, skipping save.")

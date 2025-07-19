@@ -80,14 +80,31 @@ setTimeout(() => {
         });
     });
 
+    const extractedDateData = [];
+    const outerTdDate = document.querySelectorAll('.xW.xY');
 
-    if (extractedContactData.length > 0 || extractedSubjectData.length > 0 || extractedPreviewData.length > 0) {
+    outerTdDate.forEach((outerTd, index) => {
+        const innerSpan = outerTd.querySelector('span');
+
+        if (innerSpan) {
+            const DateContent = innerSpan?.getAttribute('title');
+            extractedDateData.push({
+                ID: index,
+                Date: DateContent
+            });
+        }
+    });
+
+
+    if (extractedContactData.length > 0 && extractedSubjectData.length > 0 && extractedPreviewData.length > 0 && extractedDateData.length > 0) {
+        console.log("testDate:", extractedDateData);
         chrome.runtime.sendMessage({
             type: "EXTRACTED_DATA",
             payload: {
                 contacts: extractedContactData,
                 subjects: extractedSubjectData,
                 previews: extractedPreviewData,
+                dates: extractedDateData,
                 email: UserEmail
             }
         });
@@ -280,7 +297,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     } else if (message.Type === "PAUSE_CONTENT_SCRIPT") {
         PAUSED = message.Pause;
         if (PAUSED) {
-            alert("Content script paused");
+            console.log("Content script paused");
         }
     }
 });

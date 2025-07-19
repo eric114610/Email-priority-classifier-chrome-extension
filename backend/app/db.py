@@ -29,11 +29,11 @@ def get_user_db(UserEmail: str):
     }
 
 def query_thread(input: ThreadInput, UserEmail: str):
-    record = db[UserEmail][MAILS].find_one({"Name": input.Name, "Email": input.Email, "Subject": input.Subject, "Preview": input.Preview})
+    record = db[UserEmail][MAILS].find_one({"Name": input.Name, "Email": input.Email, "Subject": input.Subject, "Preview": input.Preview, "Date": input.Date})
     return record
 
 def save_thread(input: ThreadInput, UserEmail: str, MailClass: str):
-    db[UserEmail][MAILS].insert_one({"Name": input.Name, "Email": input.Email, "Subject": input.Subject, "Preview": input.Preview, "MailClass": MailClass})
+    db[UserEmail][MAILS].insert_one({"Name": input.Name, "Email": input.Email, "Subject": input.Subject, "Preview": input.Preview, "MailClass": MailClass, "Date": input.Date})
     update_stats(UserEmail, MailClass.strip())
 
 def get_stats(UserEmail: str):

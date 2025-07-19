@@ -19,6 +19,7 @@ chrome.runtime.onMessage.addListener(async (msg, sender, sendResponse) => {
                 SenderName: msg.payload.contacts[j*2].Name, 
                 SenderSubject: msg.payload.subjects[j].Text, 
                 SenderPreview: msg.payload.previews[j].Text,
+                EmailDate: msg.payload.dates[j].Date,
                 UserEmail: msg.payload.email
             }),
           })
