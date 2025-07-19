@@ -34,19 +34,21 @@ setTimeout(() => {
               console.log("User data received from popup:", data);
               updateRecordUsage(data.Total_records, MaxRecordCount);
               updateCategories(data.Optional, data.Notable, data.Important, data.Urgent, data.Critical);
+
+              let applyBtn = document.getElementById("applyPromptBtn");
+              applyBtn.disabled = !result.validPopup;
+              applyBtn.textContent = result.validPopup ? "Apply" : "WAITING";
+
+              let manageBtn = document.getElementById("manageBtn");
+              manageBtn.disabled = !result.validPopup;
+              manageBtn.textContent = result.validPopup ? "Manage" : "WAITING";
+              
             })
             .catch((err) => {
               console.error("Error fetching User data from popup:", err);
             });  
         }, 4000);
 
-        let applyBtn = document.getElementById("applyPromptBtn");
-        applyBtn.disabled = !result.validPopup;
-        applyBtn.textContent = result.validPopup ? "Apply" : "WAITING";
-
-        let manageBtn = document.getElementById("manageBtn");
-        manageBtn.disabled = !result.validPopup;
-        manageBtn.textContent = result.validPopup ? "Manage" : "WAITING";
     });
 
 }, 2000);
