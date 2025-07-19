@@ -1,5 +1,7 @@
 import { getUserEmail } from './utils.js';
 
+let validPopupChanged = false;
+
 // --- Details Button ---
 document.getElementById("detailsBtn").addEventListener("click", function() {
   window.open("learn_more.html", "LearnMore", "width=400,height=600");
@@ -34,20 +36,21 @@ setTimeout(() => {
               console.log("User data received from popup:", data);
               updateRecordUsage(data.Total_records, MaxRecordCount);
               updateCategories(data.Optional, data.Notable, data.Important, data.Urgent, data.Critical);
-
-              let applyBtn = document.getElementById("applyPromptBtn");
-              applyBtn.disabled = !result.validPopup;
-              applyBtn.textContent = result.validPopup ? "Apply" : "WAITING";
-
-              let manageBtn = document.getElementById("manageBtn");
-              manageBtn.disabled = !result.validPopup;
-              manageBtn.textContent = result.validPopup ? "Manage" : "WAITING";
-
             })
             .catch((err) => {
               console.error("Error fetching User data from popup:", err);
             });  
         }, 4000);
+
+        if (!validPopupChanged){
+            let applyBtn = document.getElementById("applyPromptBtn");
+            applyBtn.disabled = !result.validPopup;
+            applyBtn.textContent = result.validPopup ? "Apply" : "WAITING";
+
+            let manageBtn = document.getElementById("manageBtn");
+            manageBtn.disabled = !result.validPopup;
+            manageBtn.textContent = result.validPopup ? "Manage" : "WAITING";
+        }
 
     });
 
@@ -141,7 +144,57 @@ document.getElementById("applyRerun").addEventListener("click", () => {
         })
         .catch((err) => {
           console.error("Error applying prompt from popup:", err);
+
+          chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            chrome.scripting.executeScript({
+              target: { tabId: tabs[0].id },
+              function: () => {
+                const alertDiv = document.getElementById('reload-alert');
+                if (alertDiv) alertDiv.remove();
+              }
+            });
+          });
+
         });  
+
+
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          chrome.scripting.executeScript({
+            target: { tabId: tabs[0].id },
+            function: () => {
+              if (document.getElementById('reload-alert')) return; // don't duplicate
+
+              const alertDiv = document.createElement('div');
+              alertDiv.id = 'reload-alert';
+              alertDiv.textContent = "⚠️ Don't Reload This Page!";
+              alertDiv.style = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #f44336;
+                color: white;
+                padding: 12px 20px;
+                font-size: 18px;
+                font-weight: bold;
+                border-radius: 6px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+                z-index: 1000000;
+                pointer-events: none;
+                user-select: none;
+              `;
+              document.body.appendChild(alertDiv);
+
+              setTimeout(() => {
+                console.log("Removing reload alert after 10 seconds");
+                const el = document.getElementById('reload-alert');
+                if (el) el.remove();
+              }, 10000);
+            }
+
+          });
+        });
+
     });
 
 });
@@ -177,14 +230,6 @@ document.getElementById("applyNoRerun").addEventListener("click", () => {
           console.log("Response received from popup:", data);
           document.getElementById("confirmationModal").classList.add("hidden");
 
-          chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-              const currentTab = tabs[0];
-              if (currentTab && currentTab.id) {
-                  chrome.tabs.reload(currentTab.id);
-                  window.close();
-              }
-          });
-
         })
         .catch((err) => {
           console.error("Error applying prompt from popup:", err);
@@ -196,6 +241,8 @@ document.getElementById("applyNoRerun").addEventListener("click", () => {
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName === "local" && changes.validPopup) {
+        validPopupChanged = true;
+
         let isValid = changes.validPopup.newValue;
 
         const applyBtn = document.getElementById("applyPromptBtn");
