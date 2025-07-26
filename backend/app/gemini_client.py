@@ -4,7 +4,10 @@ import os
 from app.schemas import ThreadInput
 
 # genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-from dotenv import load_dotenv\nload_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))\n
+from dotenv import load_dotenv
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
+
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel("gemini-2.0-flash")
 
 def generate_mail_class(input: ThreadInput, userPrompt:str) -> str:

@@ -2,13 +2,15 @@ from pymongo import MongoClient
 import os
 
 from app.schemas import ThreadInput
+from dotenv import load_dotenv
 
 STATS = 'stats'
 MAILS = 'records'
 SETTINGS = 'LLM_prompt'
 
-# client = MongoClient(os.getenv("MONGO_URI"))
-from dotenv import load_dotenv\nload_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))\nclient = MongoClient(os.getenv("MONGO_URI"))
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
+
+client = MongoClient(os.getenv("MONGO_URI"))
 db = client.smartreply
 
 def get_user_db(UserEmail: str):
