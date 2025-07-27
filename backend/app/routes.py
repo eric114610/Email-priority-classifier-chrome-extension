@@ -2,8 +2,8 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 import time
 from app.gemini_client import generate_mail_class
-from app.db import save_thread, query_thread, get_stats, get_user_db, get_prompt, save_prompt, reset_stats
-from app.schemas import BackendInput, ThreadInput, UserData, PromptInput
+from app.db import save_thread, query_thread, get_stats, get_user_db, get_prompt, save_prompt, reset_stats, delete_records_by_oldest, delete_records_by_category
+from app.schemas import RecordInput, ThreadInput, UserData, PromptInput, DeleteInput
 
 router = APIRouter()
 
@@ -14,7 +14,7 @@ SETTINGS = 'LLM_prompt'
 
 
 @router.post("/get_mail_class")
-async def get_mail_class(input: BackendInput):
+async def get_mail_class(input: RecordInput):
     threadInput = ThreadInput(
         Email=input.SenderEmail,
         Name=input.SenderName,
@@ -89,3 +89,15 @@ async def apply_custom_prompt(input: PromptInput):
 
 
     return {"message": "Custom prompt applied successfully."}
+
+@router.post("/delete_record")
+async def delete_record(input: DeleteInput):
+    delete_count = 0
+
+    if input.DeleteCount == 0:
+        delete_count = delete_records_by_category(input.UserEmail, input.DeleteCategory)
+    else:
+        delete_count = delete_records_by_oldest(input.UserEmail, input.DeleteCount)
+
+    print(f"Deleted {delete_count} records for {input.UserEmail}.")
+    return {"message": f"Deleted {delete_count} records successfully."}

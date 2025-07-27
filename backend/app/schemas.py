@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-class BackendInput(BaseModel):
+class RecordInput(BaseModel):
     SenderEmail: str
     SenderName: str
     SenderSubject: str
@@ -22,3 +22,8 @@ class PromptInput(BaseModel):
     UserEmail: str
     CustomPrompt: str
     reRun: bool = False
+
+class DeleteInput(BaseModel):
+    UserEmail: str
+    DeleteCount: int
+    DeleteCategory: str

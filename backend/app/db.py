@@ -36,7 +36,7 @@ def query_thread(input: ThreadInput, UserEmail: str):
 
 def save_thread(input: ThreadInput, UserEmail: str, MailClass: str):
     db[UserEmail][MAILS].insert_one({"Name": input.Name, "Email": input.Email, "Subject": input.Subject, "Preview": input.Preview, "MailClass": MailClass, "Date": input.Date})
-    update_stats(UserEmail, MailClass.strip())
+    update_stats(UserEmail, MailClass.strip(), 1)
 
 def get_stats(UserEmail: str):
     stats = db[UserEmail][STATS].find_one({"Email": UserEmail})
@@ -46,11 +46,11 @@ def get_stats(UserEmail: str):
         db[UserEmail][STATS].insert_one(stats)
     return stats
 
-def update_stats(UserEmail: str, category: str):
+def update_stats(UserEmail: str, category: str, count: int):
     stats = get_stats(UserEmail)
-    stats[category] += 1
+    stats[category] += count
     print(f"Updating stats for {UserEmail}: {category} count is now {stats[category]}")
-    stats['Total_records'] += 1
+    stats['Total_records'] += count
     db[UserEmail][STATS].update_one({"Email": UserEmail}, {"$set": stats})
     return stats
 
@@ -77,3 +77,22 @@ def get_prompt(UserEmail: str):
 def save_prompt(UserEmail: str, prompt: str):
     db[UserEmail][SETTINGS].update_one({"Email": UserEmail}, {"$set": {"Prompt": prompt}})
     return prompt
+
+def delete_records_by_oldest(UserEmail: str, count: int):
+    user_db = get_user_db(UserEmail)
+    records = list(user_db[MAILS].find({}).sort("Date", 1).limit(count))
+    delete_count = 0
+    if records:
+        for record in records:
+            user_db[MAILS].delete_one({"_id": record["_id"]})
+            print(f"Deleted record: {record}")
+            delete_count += 1
+            update_stats(UserEmail, record["MailClass"].strip(), -1)
+    
+    return delete_count
+
+def delete_records_by_category(UserEmail: str, category: str):
+    user_db = get_user_db(UserEmail)
+    result = user_db[MAILS].delete_many({"MailClass": category+'\n'})
+    update_stats(UserEmail, category, -result.deleted_count)
+    return result.deleted_count

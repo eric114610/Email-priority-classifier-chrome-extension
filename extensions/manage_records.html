@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>EPIC Record Management</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+      width: 360px;
+      background: linear-gradient(to bottom right, #e3f2fd, #fce4ec);
+      color: #333;
+    }
+
+    h1 {
+      font-size: 1.6em;
+      text-align: center;
+      color: #1976d2;
+      margin-bottom: 20px;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    }
+
+    .section {
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    .section-title {
+      font-weight: 600;
+      font-size: 1.1em;
+      margin-bottom: 10px;
+      color: #1565c0;
+    }
+
+    .explanation p {
+      font-size: 0.95em;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    .toggle-btn {
+      padding: 6px;
+      font-size: 0.9em;
+      border-radius: 10px;
+      border: 1px solid #bbb;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .toggle-btn:hover {
+      background-color: #f0f8ff;
+    }
+
+    .toggle-btn.selected {
+      background-color: #1976d2;
+      color: white;
+      border-color: #1976d2;
+    }
+
+    .counter-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .icon-btn {
+      background: #e0e0e0;
+      font-size: 1.2em;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .icon-btn:hover {
+      background: #d0d0d0;
+    }
+
+    #counter {
+      font-size: 1.2em;
+      font-weight: bold;
+      min-width: 24px;
+      text-align: center;
+    }
+
+    .action-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 8px 12px;
+      font-size: 0.95em;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .confirm-btn {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .reset-btn {
+      background-color: #ffc107;
+      color: #333;
+    }
+
+    .goback-btn {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .action-btn:hover {
+      opacity: 0.9;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 24px;
+      border-radius: 8px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .modal-buttons {
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+  </style>
+</head>
+<body>
+  <h1>Manage EPIC Records</h1>
+
+  <div class="section explanation">
+    <div class="section-title">How it Works</div>
+    <p>Use the buttons below to select one of the options.</p>
+    <p>Only one option among all can be selected at a time.</p>
+    <p>Or use the counter to input a numeric option instead.</p>
+  </div>
+
+  <div class="section">
+    <div class="button-grid" id="section1">
+      <button class="toggle-btn">Delete ALL Optional</button>
+      <button class="toggle-btn">Delete ALL Notable</button>
+      <button class="toggle-btn">Delete ALL Important</button>
+      <button class="toggle-btn">Delete ALL Urgent</button>
+      <button class="toggle-btn">Delete ALL Critical</button>
+      <button class="toggle-btn">Delete Oldest 5 Records</button>
+      <button class="toggle-btn">Delete Oldest 10 Records</button>
+      <button class="toggle-btn">Delete Oldest 25 Records</button>
+      <button class="toggle-btn">Delete Oldest 50 Records</button>
+    </div>
+
+    <div class="counter-controls">
+      <button class="icon-btn" id="decrementBtn">−</button>
+      <span id="counter">0</span>
+      <button class="icon-btn" id="incrementBtn">+</button>
+    </div>
+  </div>
+
+  <div class="section action-buttons">
+    <button class="action-btn confirm-btn" id="confirmBtn">Confirm</button>
+    <button class="action-btn reset-btn" id="resetBtn">Reset</button>
+    <button class="action-btn goback-btn" id="gobackBtn">Go Back</button>
+  </div>
+
+  <div id="confirmationModal" class="modal hidden">
+    <div class="modal-content">
+      <p>Are you sure you want to delete these records?</p>
+      <p>Deletion cannot be undo.</p>
+      <div class="modal-buttons">
+        <button class="btn" id="reConfirmBtn">Confirm</button>
+        <button class="btn" id="cancelModalBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="manage_records.js"></script>
+</body>
+</html>
