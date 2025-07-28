@@ -15,14 +15,9 @@ setTimeout(() => {
         return;
     }
     
-    const mainTd = document.querySelector('td.aRz.J-KU')
-    if (!mainTd) {
-        console.log("Wrong TD");
-        return;
-    }
 
-    const mainDiv = mainTd.querySelector('div');
-    if (mainDiv?.getAttribute('aria-selected') !== 'true' || mainDiv?.getAttribute('aria-label') !== "主要") {
+    const mainDiv = document.querySelector('div.aIf-aLe');
+    if (mainDiv?.getAttribute('aria-selected') !== 'true') {
         console.log('Wrong table div', mainDiv?.getAttribute('aria-label'));
         return;
     }
@@ -128,6 +123,7 @@ setTimeout(() => {
                     let tmpName = node.querySelector('.bA4').querySelector('span[email]').getAttribute('name');
                     let tmpSubject = node.querySelector('.bog').querySelector('span').textContent;
                     let tmpPreview = node.querySelector('.y2').textContent;
+                    let tmpDate = node.querySelector('.xW.xY').querySelector('span').getAttribute('title');
                     console.log("New email row detected:", tmpEmail, tmpName, tmpSubject, tmpPreview);
 
                     tmpMap = new Map();
@@ -146,6 +142,7 @@ setTimeout(() => {
                             SenderName: tmpName, 
                             SenderSubject: tmpSubject, 
                             SenderPreview: tmpPreview,
+                            EmailDate: tmpDate,
                             UserEmail: UserEmail
                         }),
                     })
@@ -205,15 +202,9 @@ function addHighlights(classNameArray) {
 }
 
 function applyHighlights() {
-    const mainTd = document.querySelector('td.aRz.J-KU')
-    if (!mainTd) {
-        console.log("Wrong TD");
-        return;
-    }
-
-    const mainDiv = mainTd.querySelector('div');
-    if (mainDiv?.getAttribute('aria-selected') !== 'true' || mainDiv?.getAttribute('aria-label') !== "主要") {
-        console.log('Wrong table', mainDiv?.getAttribute('aria-label'));
+    const mainDiv = document.querySelector('div.aIf-aLe');
+    if (mainDiv?.getAttribute('aria-selected') !== 'true') {
+        console.log('Wrong table div', mainDiv?.getAttribute('aria-label'));
         return;
     }
 
@@ -248,15 +239,9 @@ function applyHighlights() {
 }
 
 function removeHighlights() {
-    const mainTd = document.querySelector('td.aRz.J-KU')
-    if (!mainTd) {
-        console.log("Wrong TD");
-        return;
-    }
-
-    const mainDiv = mainTd.querySelector('div');
-    if (mainDiv?.getAttribute('aria-selected') !== 'true' || mainDiv?.getAttribute('aria-label') !== "主要") {
-        console.log('Wrong table', mainDiv?.getAttribute('aria-label'));
+    const mainDiv = document.querySelector('div.aIf-aLe');
+    if (mainDiv?.getAttribute('aria-selected') !== 'true') {
+        console.log('Wrong table div', mainDiv?.getAttribute('aria-label'));
         return;
     }
 
