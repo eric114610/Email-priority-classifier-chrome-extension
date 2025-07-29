@@ -101,7 +101,9 @@ document.addEventListener("DOMContentLoaded", () => {
     .then((res) => res.json())
     .then( async (data) => {
       console.log("Response received from manage_records:", data);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      document.getElementById("successApplyOverlay").classList.remove("hidden");
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      document.getElementById("successApplyOverlay").classList.add("hidden");
       window.close();
     })
     .catch((err) => {

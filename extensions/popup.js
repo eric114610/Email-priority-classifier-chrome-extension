@@ -36,21 +36,23 @@ setTimeout(() => {
               console.log("User data received from popup:", data);
               updateRecordUsage(data.Total_records, MaxRecordCount);
               updateCategories(data.Optional, data.Notable, data.Important, data.Urgent, data.Critical);
+
+              if (!validPopupChanged){
+                  let applyBtn = document.getElementById("applyPromptBtn");
+                  applyBtn.disabled = !result.validPopup;
+                  applyBtn.textContent = result.validPopup ? "Apply" : "WAITING";
+
+                  let manageBtn = document.getElementById("manageBtn");
+                  manageBtn.disabled = !result.validPopup;
+                  manageBtn.textContent = result.validPopup ? "Manage" : "WAITING";
+                  validPopupChanged = true;
+              }
+
             })
             .catch((err) => {
               console.error("Error fetching User data from popup:", err);
             });  
         }, 4000);
-
-        if (!validPopupChanged){
-            let applyBtn = document.getElementById("applyPromptBtn");
-            applyBtn.disabled = !result.validPopup;
-            applyBtn.textContent = result.validPopup ? "Apply" : "WAITING";
-
-            let manageBtn = document.getElementById("manageBtn");
-            manageBtn.disabled = !result.validPopup;
-            manageBtn.textContent = result.validPopup ? "Manage" : "WAITING";
-        }
 
     });
 
@@ -104,6 +106,11 @@ document.getElementById("applyRerun").addEventListener("click", () => {
     const promptValue = document.getElementById("promptInput").value;
     console.log("apply with re-run.", promptValue);
 
+    if(promptValue === "") {
+      console.log("Prompt is empty, not applying.");
+      return;
+    }
+
     document.getElementById("loadingOverlay").classList.remove("hidden");
 
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -128,11 +135,15 @@ document.getElementById("applyRerun").addEventListener("click", () => {
             }),
         })
         .then((res) => res.json())
-        .then((data) => {
+        .then(async (data) => {
 
           console.log("Response received from popup:", data);
           document.getElementById("loadingOverlay").classList.add("hidden");
           document.getElementById("confirmationModal").classList.add("hidden");
+
+          document.getElementById("successApplyOverlay").classList.remove("hidden");
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          document.getElementById("successApplyOverlay").classList.add("hidden");
 
           chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
               const currentTab = tabs[0];
@@ -202,6 +213,10 @@ document.getElementById("applyRerun").addEventListener("click", () => {
 document.getElementById("applyNoRerun").addEventListener("click", () => {
     const promptValue = document.getElementById("promptInput").value;
     console.log("apply without re-run.", promptValue);
+    if(promptValue === "") {
+      console.log("Prompt is empty, not applying.");
+      return;
+    }
 
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0]?.id) {
@@ -225,10 +240,16 @@ document.getElementById("applyNoRerun").addEventListener("click", () => {
             }),
         })
         .then((res) => res.json())
-        .then((data) => {
+        .then(async (data) => {
 
           console.log("Response received from popup:", data);
+          document.getElementById("promptInput").value = "";
+          wordCount.innerText = `${0}/${maxWords} words`;
           document.getElementById("confirmationModal").classList.add("hidden");
+
+          document.getElementById("successApplyOverlay").classList.remove("hidden");
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          document.getElementById("successApplyOverlay").classList.add("hidden");
 
         })
         .catch((err) => {
