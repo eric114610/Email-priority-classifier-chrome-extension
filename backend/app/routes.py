@@ -11,7 +11,8 @@ STATS = 'stats'
 MAILS = 'records'
 SETTINGS = 'LLM_prompt'
 
-
+MAX_RECORDS = 100
+DELETE_RECORDS = 5
 
 @router.post("/get_mail_class")
 async def get_mail_class(input: RecordInput):
@@ -28,6 +29,12 @@ async def get_mail_class(input: RecordInput):
         return {"MailClass": record["MailClass"]}
     
     print("No record found, generating summary.")
+
+    recordCount = get_stats(input.UserEmail)["Total_records"]
+    if recordCount >= MAX_RECORDS:
+        print(f"Record count {recordCount} exceeds limit, deleting oldest records.")
+        deleteCount = delete_records_by_oldest(input.UserEmail, DELETE_RECORDS)
+        print(f"Deleted {deleteCount} oldest records for {input.UserEmail}.")
 
     userPrompt = get_prompt(input.UserEmail)
     MailClass = generate_mail_class(threadInput, userPrompt)
