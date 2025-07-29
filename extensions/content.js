@@ -190,6 +190,27 @@ setTimeout(() => {
 }, 3000);
 
 
+function isCorrectTable() {
+    const mainDiv = document.querySelector('div.aIf-aLe');
+    if (mainDiv?.getAttribute('aria-selected') !== 'true') {
+        console.log('Wrong table div', mainDiv?.getAttribute('aria-label'));
+        return false;
+    }
+
+    const divM7 = document.getElementById(':m7');
+    if (divM7) {
+        const spanTs = divM7.querySelector('span.ts');
+        if (spanTs) {
+            const text = spanTs.textContent;
+            if(text !== "1") {
+                console.log("Wrong table, ts text is not 1:", text);
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
 
 let lastHighlights = new Map();
 
@@ -202,9 +223,7 @@ function addHighlights(classNameArray) {
 }
 
 function applyHighlights() {
-    const mainDiv = document.querySelector('div.aIf-aLe');
-    if (mainDiv?.getAttribute('aria-selected') !== 'true') {
-        console.log('Wrong table div', mainDiv?.getAttribute('aria-label'));
+    if (!isCorrectTable()) {
         return;
     }
 
@@ -239,9 +258,7 @@ function applyHighlights() {
 }
 
 function removeHighlights() {
-    const mainDiv = document.querySelector('div.aIf-aLe');
-    if (mainDiv?.getAttribute('aria-selected') !== 'true') {
-        console.log('Wrong table div', mainDiv?.getAttribute('aria-label'));
+    if (!isCorrectTable()) {
         return;
     }
 
