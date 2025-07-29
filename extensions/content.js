@@ -162,8 +162,8 @@ setTimeout(() => {
                             case "Urgent\n":
                                 NewClassName = "urgent-reply-color"
                             break;
-                            case "Crucial\n":
-                                NewClassName = "crucial-reply-color"
+                            case "critical\n":
+                                NewClassName = "critical-reply-color"
                             break;
                             default:
                             break;

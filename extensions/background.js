@@ -41,8 +41,8 @@ chrome.runtime.onMessage.addListener(async (msg, sender, sendResponse) => {
                 case "Urgent\n":
                     className = "urgent-reply-color"
                   break;
-                case "Crucial\n":
-                    className = "crucial-reply-color"
+                case "Critical\n":
+                    className = "critical-reply-color"
                   break;
                 default:
                   break;
