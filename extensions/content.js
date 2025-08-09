@@ -141,58 +141,16 @@ setTimeout(async () => {
                     let tmpDate = node.querySelector('.xW.xY').querySelector('span').getAttribute('title');
                     console.log("New email row detected:", tmpEmail, tmpName, tmpSubject, tmpPreview);
 
-                    tmpMap = new Map();
-
-                    for (const [ID, className] of lastHighlights.entries()) {
-                        tmpMap.set(Number(ID)+1, className);
-                        console.log("Old Map:", ID, className);
-                    }
-
-                    let NewClassName = "";
-                    fetch("http://localhost:8000/get_mail_class", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ 
-                            SenderEmail: tmpEmail, 
-                            SenderName: tmpName, 
-                            SenderSubject: tmpSubject, 
-                            SenderPreview: tmpPreview,
-                            EmailDate: tmpDate,
-                            UserEmail: UserEmail
-                        }),
-                    })
-                        .then((res) => res.json())
-                        .then((data) => {
-                        console.log("New MailClass received from backend:", data.MailClass);
-                        switch (data.MailClass) {
-                            case "Optional\n":
-                                NewClassName = "optional-reply-color"
-                            break;
-                            case "Notable\n":
-                                NewClassName = "notable-reply-color"
-                            break;
-                            case "Important\n":
-                                NewClassName = "important-reply-color"
-                            break;
-                            case "Urgent\n":
-                                NewClassName = "urgent-reply-color"
-                            break;
-                            case "critical\n":
-                                NewClassName = "critical-reply-color"
-                            break;
-                            default:
-                            break;
+                    chrome.runtime.sendMessage({
+                        type: "NEW_MAIL_DATA",
+                        payload: {
+                            email: tmpEmail,
+                            name: tmpName,
+                            subject: tmpSubject,
+                            preview: tmpPreview,
+                            date: tmpDate,
+                            userEmail: UserEmail
                         }
-
-                        removeHighlights();
-                        tmpMap.set(0, NewClassName);
-                        lastHighlights = tmpMap;
-                        
-                        for (const [ID, className] of lastHighlights.entries()) {
-                            console.log("New Map:", ID, className);
-                        }
-                        
-                        applyHighlights();
                     });
 
                 }
@@ -306,12 +264,36 @@ function removeHighlights() {
     }
 }
 
+function updateHighlights(ClassName) {
+    tmpMap = new Map();
+
+    for (const [ID, className] of lastHighlights.entries()) {
+        if(Number(ID) == 49)
+            continue;
+        tmpMap.set(Number(ID)+1, className);
+        console.log("Old Map:", ID, className);
+    }
+
+    removeHighlights();
+
+    tmpMap.set(0, ClassName)
+
+    lastHighlights = tmpMap;
+    for (const [ID, className] of lastHighlights.entries()) {
+        console.log("New Map:", ID, className);
+    }
+
+    applyHighlights();
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log("Content script received message:", message);
     if (message.Type === "HIGHLIGHT_MAIL_ARRAY") {
         addHighlights(message.ClassNameArray);
         applyHighlights();
-    } else if (message.Type === "PAUSE_CONTENT_SCRIPT") {
+    } else if (message.Type === "NEW_HIGHLIGHT_MAIL") {
+        updateHighlights(message.ClassName);
+    }else if (message.Type === "PAUSE_CONTENT_SCRIPT") {
         PAUSED = message.Pause;
         if (PAUSED) {
             console.log("Content script paused");

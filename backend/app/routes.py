@@ -16,30 +16,55 @@ DELETE_RECORDS = 5
 
 @router.post("/get_mail_class")
 async def get_mail_class(input: RecordInput):
-    threadInput = ThreadInput(
-        Email=input.SenderEmail,
-        Name=input.SenderName,
-        Subject=input.SenderSubject,
-        Preview=input.SenderPreview,
-        Date=input.EmailDate
-    )
-    record = query_thread(threadInput, input.UserEmail)
-    if record:
-        print("Record found in database, returning MailClass.", input.SenderEmail, input.SenderSubject, input.SenderPreview, input.EmailDate)
-        return {"MailClass": record["MailClass"]}
+    threads: list[ThreadInput] = []
+    length = len(input.SenderEmail)
+
+    MailClasses = []
+    processCount = 0
     
-    print("No record found, generating summary.")
+    for i in range(length):
+        thread = ThreadInput(
+            Email=input.SenderEmail[i],
+            Name=input.SenderName[i],
+            Subject=input.SenderSubject[i],
+            Preview=input.SenderPreview[i],
+            Date=input.EmailDate[i],
+            Index=i
+        )
 
-    recordCount = get_stats(input.UserEmail)["Total_records"]
-    if recordCount >= MAX_RECORDS:
-        print(f"Record count {recordCount} exceeds limit, deleting oldest records.")
-        deleteCount = delete_records_by_oldest(input.UserEmail, DELETE_RECORDS)
-        print(f"Deleted {deleteCount} oldest records for {input.UserEmail}.")
+        record = query_thread(thread, input.UserEmail)
+        if record:
+            print("Record found in database, returning MailClass.", thread.Date)
+            MailClasses.append((i, record["MailClass"]))
+        else:
+            print("No record found, generating summary.")
+            threads.append(thread)
+            processCount += 1
 
-    userPrompt = get_prompt(input.UserEmail)
-    MailClass = generate_mail_class(threadInput, userPrompt)
-    save_thread(threadInput, input.UserEmail, MailClass)
-    return {"MailClass": MailClass}
+    if processCount > 0:
+
+        recordCount = get_stats(input.UserEmail)["Total_records"]
+        if recordCount+processCount > MAX_RECORDS:
+            print(f"Record count {recordCount}+{processCount} exceeds limit, deleting oldest records.")
+            deleteCount = delete_records_by_oldest(input.UserEmail, processCount)
+            print(f"Deleted {deleteCount} oldest records for {input.UserEmail}.")
+
+        userPrompt = get_prompt(input.UserEmail)
+        response = generate_mail_class(threads, userPrompt, processCount)
+
+        responseCount = 0
+        for line in response.split('\n'):
+            if not line.strip():  # skip empty lines
+                continue
+
+            index_str, MailClass = line.split(':')
+            index = int(index_str)
+            MailClasses.append((index, MailClass))
+            save_thread(threads[responseCount], input.UserEmail, MailClass)
+            responseCount += 1
+
+    print(MailClasses)
+    return {"MailClass": MailClasses}
 
 
 @router.post("/get_stats")
@@ -78,22 +103,31 @@ async def apply_custom_prompt(input: PromptInput):
                 print(f"Deleted all stored mails for {input.UserEmail} before re-running.")
                 reset_stats(input.UserEmail)
 
-
-            for index, record in enumerate(records, start=1):  # start=1 so index starts at 1
-                threadInput = ThreadInput(
+            threads: list[ThreadInput] = []
+            processCount = 0
+            for index, record in enumerate(records):  # start=1 so index starts at 1
+                thread = ThreadInput(
                     Email=record['Email'],
                     Name=record['Name'],
                     Subject=record['Subject'],
                     Preview=record['Preview'],
-                    Date=record['Date']
+                    Date=record['Date'],
+                    Index=index
                 )
-                print(f"Re-running mail: {threadInput.Name}")
-                MailClass = generate_mail_class(threadInput, input.CustomPrompt)
-                save_thread(threadInput, input.UserEmail, MailClass)
+                # print(f"Re-running mail: {threadInput.Name}")
+                threads.append(thread)
+                processCount += 1
 
-                if index % 5 == 0 and index != len(records):
-                    print("Waiting for 20 seconds before continuing...")
-                    time.sleep(20)
+            response = generate_mail_class(threads, input.CustomPrompt, processCount)
+            responseCount = 0
+            
+            for line in response.split('\n'):
+                if not line.strip():  # skip empty lines
+                    continue
+
+                index_str, MailClass = line.split(':')
+                save_thread(threads[responseCount], input.UserEmail, MailClass)
+                responseCount += 1
 
             print(f"Re-ran all stored mails for {input.UserEmail}.")
     else:

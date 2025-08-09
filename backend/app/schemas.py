@@ -1,11 +1,11 @@
 from pydantic import BaseModel
 
 class RecordInput(BaseModel):
-    SenderEmail: str
-    SenderName: str
-    SenderSubject: str
-    SenderPreview: str
-    EmailDate: str
+    SenderEmail: list[str]
+    SenderName: list[str]
+    SenderSubject: list[str]
+    SenderPreview: list[str]
+    EmailDate: list[str]
     UserEmail: str
 
 class ThreadInput(BaseModel):
@@ -14,6 +14,7 @@ class ThreadInput(BaseModel):
     Subject: str
     Preview: str
     Date: str
+    Index: int
 
 class UserData(BaseModel):
     Email: str

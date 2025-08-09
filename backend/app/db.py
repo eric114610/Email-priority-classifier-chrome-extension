@@ -93,7 +93,7 @@ def delete_records_by_oldest(UserEmail: str, count: int):
 
 def delete_records_by_category(UserEmail: str, category: str):
     user_db = get_user_db(UserEmail)
-    result = user_db[MAILS].delete_many({"MailClass": category+'\n'})
+    result = user_db[MAILS].delete_many({"MailClass": category})
     update_stats(UserEmail, category, -result.deleted_count)
     return result.deleted_count
 

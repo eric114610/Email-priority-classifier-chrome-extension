@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "SmartReply Inbox",
+  "name": "Email Priority Instant Classifier (EPIC)",
   "version": "1.0",
   "permissions": ["scripting", "activeTab", "storage", "tabs", "background"],
   "host_permissions": ["https://mail.google.com/*"],
