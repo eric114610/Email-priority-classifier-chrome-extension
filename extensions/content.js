@@ -1,7 +1,7 @@
 console.log("Content script loaded");
 let PAUSED = false;
 
-setTimeout(() => {
+setTimeout(async () => {
     UserEmail = document.querySelector('.gb_B.gb_Za.gb_0').getAttribute('aria-label');
     const start = UserEmail.indexOf('(');
     const end = UserEmail.indexOf('@', start);
@@ -10,7 +10,7 @@ setTimeout(() => {
         UserEmail = UserEmail.substring(start + 1, end);
         console.log(UserEmail);
         chrome.storage.local.set({ UserEmail: UserEmail });
-        chrome.storage.local.set({ validPopup: false });
+        chrome.storage.local.set({ validPopup: false, stats_updated: false });
     } else {
         return;
     }
@@ -28,6 +28,21 @@ setTimeout(() => {
             email: UserEmail
         }
     });
+
+    let statsUpdated = false;
+    let counter = 0;
+    while(!statsUpdated) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        chrome.storage.local.get(['stats_updated'], (result) => {
+            statsUpdated = result.stats_updated;
+            console.log("Stats updated:", statsUpdated);
+        });
+        counter++;
+        if (counter > 5) {
+            console.log("Timeout waiting for stats update");
+            break;
+        }
+    }
 
     const extractedContactData = [];
     const outerSpansContact = document.querySelectorAll('.bA4');
@@ -104,7 +119,7 @@ setTimeout(() => {
             }
         });
 
-        console.log("SmartReply: Extracted data sent to background.js");
+        console.log("EPIC: Extracted data sent to background.js");
     }
 
     const table = document.querySelector('.F.cf.zt');

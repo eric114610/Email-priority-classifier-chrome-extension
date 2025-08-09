@@ -2,8 +2,8 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 import time
 from app.gemini_client import generate_mail_class
-from app.db import save_thread, query_thread, get_stats, get_user_db, get_prompt, save_prompt, reset_stats, delete_records_by_oldest, delete_records_by_category
-from app.schemas import RecordInput, ThreadInput, UserData, PromptInput, DeleteInput
+from app.db import save_thread, query_thread, get_stats, get_user_db, get_prompt, save_prompt, reset_stats, delete_records_by_oldest, delete_records_by_category, get_records_to_process, set_records_to_process
+from app.schemas import RecordInput, ThreadInput, UserData, PromptInput, DeleteInput, RecordsToProcessInput
 
 router = APIRouter()
 
@@ -49,7 +49,12 @@ async def getStats(input: UserData):
     UserStats = get_stats(input.Email)
     if "_id" in UserStats:
         del UserStats["_id"]
+
+    records_to_process = get_records_to_process(input.Email)
+    UserStats['Records_to_process'] = records_to_process
+
     print("User stats retrieved:", UserStats)
+    
     return UserStats
 
 @router.post("/apply_custom_prompt")
@@ -87,8 +92,8 @@ async def apply_custom_prompt(input: PromptInput):
                 save_thread(threadInput, input.UserEmail, MailClass)
 
                 if index % 5 == 0 and index != len(records):
-                    print("Waiting for 15 seconds before continuing...")
-                    time.sleep(15)
+                    print("Waiting for 20 seconds before continuing...")
+                    time.sleep(20)
 
             print(f"Re-ran all stored mails for {input.UserEmail}.")
     else:
@@ -108,3 +113,9 @@ async def delete_record(input: DeleteInput):
 
     print(f"Deleted {delete_count} records for {input.UserEmail}.")
     return {"message": f"Deleted {delete_count} records successfully."}
+
+@router.post("/apply_records_to_process")
+async def apply_records_to_process(input: RecordsToProcessInput):
+    set_records_to_process(input.UserEmail, input.RecordsToProcess)
+    print(f"Records to process set to {input.RecordsToProcess} for {input.UserEmail}.")
+    return {"message": "Records to process setting applied successfully."}

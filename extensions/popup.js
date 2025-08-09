@@ -14,10 +14,10 @@ document.getElementById("manageBtn").addEventListener("click", function() {
 
 // --- Record Usage Bar & Count (Template) ---
 const MaxRecordCount = 100;
+let UserEmail = '';
 
 setTimeout(() => {
 
-    let UserEmail = '';
     chrome.storage.local.get(['UserEmail', 'validPopup'], (result) => {
         UserEmail = result.UserEmail;
         console.log('UserEmail from storage for popup:', UserEmail, result.validPopup);
@@ -46,6 +46,9 @@ setTimeout(() => {
                   manageBtn.disabled = !result.validPopup;
                   manageBtn.textContent = result.validPopup ? "Manage" : "WAITING";
                   validPopupChanged = true;
+
+                  applyRecordsToProcessBtn.disabled = !result.validPopup;
+                  applyRecordsToProcessBtn.textContent = result.validPopup ? "Apply Setting" : "WAITING";
               }
 
             })
@@ -274,6 +277,49 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
         manageBtn.disabled = !isValid;
         manageBtn.textContent = isValid ? "Manage" : "WAITING";
 
+        applyRecordsToProcessBtn.disabled = !isValid;
+        applyRecordsToProcessBtn.textContent = isValid ? "Apply Setting" : "WAITING";
+
         console.log("Popup updated with validPopup:", isValid);
     }
+});
+
+
+const counterDisplay = document.getElementById("counter");
+const incrementBtn = document.getElementById("incrementBtn");
+const decrementBtn = document.getElementById("decrementBtn");
+const applyRecordsToProcessBtn = document.getElementById("applyRecordsToProcess");
+
+function updateCounter(change) {
+  let current = parseInt(counterDisplay.textContent);
+  const newValue = Math.max(5, Math.min(50, current + change));
+  if (newValue !== current) {
+    counterDisplay.textContent = newValue;
+  }
+}
+
+incrementBtn.addEventListener("click", () => updateCounter(5));
+decrementBtn.addEventListener("click", () => updateCounter(-5));
+
+applyRecordsToProcessBtn.addEventListener("click", () => {
+    console.log("Applying records to process:", parseInt(counterDisplay.textContent), UserEmail);
+    fetch("http://localhost:8000/apply_records_to_process", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            UserEmail: UserEmail,
+            RecordsToProcess: parseInt(counterDisplay.textContent)
+        }),
+    })
+    .then((res) => res.json())
+    .then((data) => {
+        console.log("Response received from popup:", data);
+        document.getElementById("successApplyOverlay").classList.remove("hidden");
+        setTimeout(() => {
+            document.getElementById("successApplyOverlay").classList.add("hidden");
+        }, 2000);
+    })
+    .catch((err) => {
+        console.error("Error applying records to process:", err);
+    });
 });

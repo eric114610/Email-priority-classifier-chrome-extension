@@ -254,6 +254,35 @@
       font-family: Arial, sans-serif;
     }
 
+  .counter-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  #counter {
+      font-size: 1.2em;
+      font-weight: bold;
+      min-width: 24px;
+      text-align: center;
+    }
+
+    .icon-btn {
+      background: #e0e0e0;
+      font-size: 1.2em;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .icon-btn:hover {
+      background: #d0d0d0;
+    }
+
 
   </style>
 </head>
@@ -294,6 +323,20 @@
       <li id="cat-urgent">Urgent <span class="cat-value">0</span></li>
       <li id="cat-critical">Critical <span class="cat-value">0</span></li>
     </ul>
+  </div>
+
+
+  <div class="section">
+    <div class="section-title"># of records to process</div>
+    <div>Set the number of records to process:</div>
+    <div class="flex-row">
+      <div class="counter-controls">
+        <button class="icon-btn" id="decrementBtn">-</button>
+        <span id="counter">10</span>
+        <button class="icon-btn" id="incrementBtn">+</button>
+      </div>
+      <button class="btn" id="applyRecordsToProcess">WAITING</button>
+    </div>
   </div>
 
 

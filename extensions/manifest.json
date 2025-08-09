@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "SmartReply Inbox",
   "version": "1.0",
-  "permissions": ["scripting", "activeTab", "storage", "tabs"],
+  "permissions": ["scripting", "activeTab", "storage", "tabs", "background"],
   "host_permissions": ["https://mail.google.com/*"],
   "action": {
     "default_popup": "popup.html",

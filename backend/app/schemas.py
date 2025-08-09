@@ -27,3 +27,7 @@ class DeleteInput(BaseModel):
     UserEmail: str
     DeleteCount: int
     DeleteCategory: str
+
+class RecordsToProcessInput(BaseModel):
+    UserEmail: str
+    RecordsToProcess: int
