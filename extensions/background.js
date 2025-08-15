@@ -153,10 +153,40 @@ chrome.runtime.onMessage.addListener( (msg, sender, sendResponse) => {
       .catch((err) => {
         console.error("Error fetching from backend:", err);
       });
-  } else if (msg.type === "UPDATE_USER_DATA") {
-    console.log("Background script received update_user_data request:", msg.payload.email);
-    
-    updateUserData(msg.payload.email);
+  } else if (msg.type === "UPDATE_USER_EMAIL") {
+    chrome.storage.local.set({ UserEmail: msg.payload.email });
+    console.log("Background script updated UserEmail:", msg.payload.email);
   }
   // console.log("Background script received message:", msg);
 });
+
+chrome.tabs.onActivated.addListener(activeInfo => {
+    chrome.tabs.get(activeInfo.tabId, tab => {
+        if (tab.url && tab.url.includes("mail.google.com")) {
+            chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                function: retrieveUserEmail
+            });
+        }
+    });
+});
+
+function retrieveUserEmail() {
+    UserEmail = document.querySelector('.gb_B.gb_Za.gb_0').getAttribute('aria-label');
+    const start = UserEmail.indexOf('(');
+    const end = UserEmail.indexOf('@', start);
+
+    if (start !== -1 && end !== -1) {
+        UserEmail = UserEmail.substring(start + 1, end);
+        console.log("User email found:", UserEmail);
+        chrome.runtime.sendMessage({ 
+            type: "UPDATE_USER_EMAIL",
+            payload: {
+                email: UserEmail
+            } 
+        });
+    } else {
+        console.error("Failed to extract user email from Gmail page");
+        return;
+    }
+}
