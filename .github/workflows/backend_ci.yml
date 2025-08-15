@@ -10,6 +10,8 @@ on:
   pull_request:
     branches: [ main ]
 
+  workflow_dispatch:
+
 env:
   GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
   MONGO_URI: ${{ secrets.MONGO_URI }}
