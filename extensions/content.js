@@ -38,7 +38,7 @@ setTimeout(async () => {
             console.log("Stats updated:", statsUpdated);
         });
         counter++;
-        if (counter > 5) {
+        if (counter > 15) {
             console.log("Timeout waiting for stats update");
             break;
         }
