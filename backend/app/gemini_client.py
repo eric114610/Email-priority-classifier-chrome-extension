@@ -1,11 +1,11 @@
 import google.generativeai as genai
 import os
 
-from app.schemas import ThreadInput
+from backend.app.schemas import ThreadInput
 
-# genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-from dotenv import load_dotenv
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
+if not os.getenv("GEMINI_API_KEY"):
+    from dotenv import load_dotenv
+    load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel("gemini-2.0-flash")

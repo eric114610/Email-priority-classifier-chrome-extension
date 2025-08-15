@@ -1,14 +1,15 @@
 from pymongo import MongoClient
 import os
 
-from app.schemas import ThreadInput
-from dotenv import load_dotenv
+from backend.app.schemas import ThreadInput
 
 STATS = 'stats'
 MAILS = 'records'
 SETTINGS = 'settings'
 
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
+if not os.getenv("MONGO_URI"):
+    from dotenv import load_dotenv
+    load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 client = MongoClient(os.getenv("MONGO_URI"))
 db = client.smartreply
