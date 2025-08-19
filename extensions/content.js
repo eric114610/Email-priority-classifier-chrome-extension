@@ -1,51 +1,58 @@
-console.log("Content script loaded");
 let PAUSED = false;
+let userEmail = '';
+let lastHighlights = new Map();
 
-setTimeout(async () => {
-    UserEmail = document.querySelector('.gb_B.gb_Za.gb_0').getAttribute('aria-label');
-    const start = UserEmail.indexOf('(');
-    const end = UserEmail.indexOf('@', start);
+if (document.readyState === 'loading') {
+  console.log("EPIC: DOM is not ready, waiting for it to load");
+  document.addEventListener('DOMContentLoaded', onDomReady);
+} else {
+  onDomReady();
+}
 
-    if (start !== -1 && end !== -1) {
-        UserEmail = UserEmail.substring(start + 1, end);
-        console.log(UserEmail);
-        chrome.storage.local.set({ UserEmail: UserEmail });
-        chrome.storage.local.set({ validPopup: false, stats_updated: false });
+async function onDomReady() {
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    console.log("EPIC: DOM is ready, starting content script");
+
+    const userProfileButton = document.querySelector('.gb_B.gb_Za.gb_0');
+
+    if (userProfileButton) {
+        userEmail = userProfileButton.getAttribute('aria-label');
+    }
+
+    if (userEmail) {
+        const pStart = userEmail.indexOf('(');
+        const pEnd = userEmail.indexOf('@', pStart);
+
+        if (pStart !== -1 && pEnd !== -1) {
+            userEmail = userEmail.substring(pStart + 1, pEnd);
+            chrome.storage.local.set({ userEmail: userEmail, validPopup: false, stats_updated: false });
+        } else {
+            console.error("EPIC: Failed to extract userEmail from DOM");
+            return;
+        }
     } else {
+        console.error("EPIC: Failed to extract userEmail from DOM");
         return;
     }
     
-
-    const mainDiv = document.querySelector('div.aIf-aLe');
-    if (mainDiv?.getAttribute('aria-selected') !== 'true') {
-        console.log('Wrong table div', mainDiv?.getAttribute('aria-label'));
+    if (!isCorrectTable()) {
+        console.error("EPIC: Not the correct table, exiting content script");
         return;
     }
 
-    chrome.runtime.sendMessage({
-        type: "GET_STATS",
-        payload: {
-            email: UserEmail
-        }
-    });
+    await confirmConnection();
 
-    let statsUpdated = false;
-    let counter = 0;
-    while(!statsUpdated) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        chrome.storage.local.get(['stats_updated'], (result) => {
-            statsUpdated = result.stats_updated;
-            console.log("Stats updated:", statsUpdated);
-        });
-        counter++;
-        if (counter > 15) {
-            console.log("Timeout waiting for stats update");
-            break;
-        }
-    }
 
     const extractedContactData = [];
+    const extractedSubjectData = [];
+    const extractedPreviewData = [];
+    const extractedDateData = [];
+
     const outerSpansContact = document.querySelectorAll('.bA4');
+    const outerSpansSubject = document.querySelectorAll('span.bog');
+    const outerSpansPreView = document.querySelectorAll('.y2');
+    const outerTdDate = document.querySelectorAll('.xW.xY');
+
 
     outerSpansContact.forEach((outerSpan, index) => {
         const innerSpan = outerSpan.querySelector('span[email]');
@@ -62,10 +69,6 @@ setTimeout(async () => {
         }
     });
 
-
-    const extractedSubjectData = [];
-    const outerSpansSubject = document.querySelectorAll('span.bog');
-
     outerSpansSubject.forEach((outerSpan, index) => {
         const innerSpan = outerSpan.querySelector('span');
 
@@ -78,10 +81,6 @@ setTimeout(async () => {
         }
     });
 
-
-    const extractedPreviewData = [];
-    const outerSpansPreView = document.querySelectorAll('.y2');
-
     outerSpansPreView.forEach((outerSpan, index) => {
         const textContent = outerSpan.textContent;
         extractedPreviewData.push({
@@ -89,9 +88,6 @@ setTimeout(async () => {
             Text: textContent
         });
     });
-
-    const extractedDateData = [];
-    const outerTdDate = document.querySelectorAll('.xW.xY');
 
     outerTdDate.forEach((outerTd, index) => {
         const innerSpan = outerTd.querySelector('span');
@@ -106,26 +102,29 @@ setTimeout(async () => {
     });
 
 
-    if (extractedContactData.length > 0 && extractedSubjectData.length > 0 && extractedPreviewData.length > 0 && extractedDateData.length > 0) {
-        console.log("testDate:", extractedDateData);
+    if ((extractedContactData.length/2 == extractedSubjectData.length) && (extractedSubjectData.length == extractedPreviewData.length) && (extractedPreviewData.length == extractedDateData.length)) {
         chrome.runtime.sendMessage({
             type: "EXTRACTED_DATA",
             payload: {
-                contacts: extractedContactData,
-                subjects: extractedSubjectData,
-                previews: extractedPreviewData,
-                dates: extractedDateData,
-                email: UserEmail
+                contactData: extractedContactData,
+                subjectData: extractedSubjectData,
+                previewData: extractedPreviewData,
+                dateData: extractedDateData,
+                email: userEmail
             }
         });
 
         console.log("EPIC: Extracted data sent to background.js");
+    } else {
+        console.error("EPIC: Failed to extract all required data from the DOM");
+        return;
     }
 
-    const table = document.querySelector('.F.cf.zt');
+
+    const mailTable = document.querySelector('.F.cf.zt');
     const emailObserver = new MutationObserver((mutationsList) => {
         if (PAUSED) {
-            console.log("Content script is paused, skipping email row mutation detection");
+            console.log("EPIC: Content script is paused, skipping email row mutation detection");
             return;
         }
 
@@ -133,7 +132,6 @@ setTimeout(async () => {
         for (const mutation of mutationsList) {
             for (const node of mutation.addedNodes) {
                 if (node.nodeType === 1 && node.matches('.zA.zE')) {
-                    console.log('New email row detected');
                     let tmpEmail = node.querySelector('.bA4').querySelector('span[email]').getAttribute('email');
                     let tmpName = node.querySelector('.bA4').querySelector('span[email]').getAttribute('name');
                     let tmpSubject = node.querySelector('.bog').querySelector('span').textContent;
@@ -149,7 +147,7 @@ setTimeout(async () => {
                             subject: tmpSubject,
                             preview: tmpPreview,
                             date: tmpDate,
-                            userEmail: UserEmail
+                            userEmail: userEmail
                         }
                     });
 
@@ -157,16 +155,19 @@ setTimeout(async () => {
             }
         }
     });
-    emailObserver.observe(table, { childList: true, subtree: true });
 
+    if (mailTable) {
+        emailObserver.observe(mailTable, { childList: true, subtree: true });
+    } else {
+        console.error("EPIC: Mail table not found, cannot observe for new email rows");
+    }
 
-}, 3000);
+};
 
 
 function isCorrectTable() {
-    const mainDiv = document.querySelector('div.aIf-aLe');
-    if (mainDiv?.getAttribute('aria-selected') !== 'true') {
-        console.log('Wrong table div', mainDiv?.getAttribute('aria-label'));
+    const MainDiv = document.querySelector('div.aIf-aLe');
+    if (MainDiv?.getAttribute('aria-selected') !== 'true') {
         return false;
     }
 
@@ -176,7 +177,6 @@ function isCorrectTable() {
         if (spanTs) {
             const text = spanTs.textContent;
             if(text !== "1") {
-                console.log("Wrong table, ts text is not 1:", text);
                 return false;
             }
         }
@@ -185,9 +185,8 @@ function isCorrectTable() {
     return true;
 }
 
-let lastHighlights = new Map();
 
-function addHighlights(classNameArray) {
+function addMailHighlights(classNameArray) {
     for (const { ID, className } of classNameArray) {
         if (!lastHighlights.has(ID)) {
             lastHighlights.set(ID, className);
@@ -195,7 +194,7 @@ function addHighlights(classNameArray) {
     }
 }
 
-function applyHighlights() {
+function applyMailHighlights() {
     if (!isCorrectTable()) {
         return;
     }
@@ -230,7 +229,7 @@ function applyHighlights() {
     }
 }
 
-function removeHighlights() {
+function removeMailHighlights() {
     if (!isCorrectTable()) {
         return;
     }
@@ -264,7 +263,7 @@ function removeHighlights() {
     }
 }
 
-function updateHighlights(ClassName) {
+function updateMailHighlights(ClassName) {
     tmpMap = new Map();
 
     for (const [ID, className] of lastHighlights.entries()) {
@@ -274,7 +273,7 @@ function updateHighlights(ClassName) {
         console.log("Old Map:", ID, className);
     }
 
-    removeHighlights();
+    removeMailHighlights();
 
     tmpMap.set(0, ClassName)
 
@@ -283,16 +282,42 @@ function updateHighlights(ClassName) {
         console.log("New Map:", ID, className);
     }
 
-    applyHighlights();
+    applyMailHighlights();
 }
 
+
+async function confirmConnection() {
+    chrome.runtime.sendMessage({
+        type: "GET_STATS",
+        payload: {
+            email: userEmail
+        }
+    });
+
+    let statsUpdated = false;
+    let counter = 0;
+    while(!statsUpdated) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        chrome.storage.local.get(['stats_updated'], (result) => {
+            statsUpdated = result.stats_updated;
+        });
+        counter++;
+        if (counter > 15) {
+            console.warn("EPIC: Timeout waiting for stats update");
+            break;
+        }
+    }
+}
+
+
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log("Content script received message:", message);
+    console.log("EPIC: Content script received message:", message);
     if (message.Type === "HIGHLIGHT_MAIL_ARRAY") {
-        addHighlights(message.ClassNameArray);
-        applyHighlights();
+        addMailHighlights(message.ClassNameArray);
+        applyMailHighlights();
     } else if (message.Type === "NEW_HIGHLIGHT_MAIL") {
-        updateHighlights(message.ClassName);
+        updateMailHighlights(message.ClassName);
     }else if (message.Type === "PAUSE_CONTENT_SCRIPT") {
         PAUSED = message.Pause;
         if (PAUSED) {
@@ -301,12 +326,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 });
 
-
 const observer = new MutationObserver(() => {
-    console.log("DOM changed, re-applying highlights");
+    console.log("EPIC: DOM changed, re-applying highlights");
     if (lastHighlights.size > 0) {
-        // console.log("Re-applying highlights after DOM change");
-        applyHighlights();
+        applyMailHighlights();
     }
 });
 observer.observe(document.body, { childList: true, subtree: true });

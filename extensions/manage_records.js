@@ -1,120 +1,116 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const toggleButtons = document.querySelectorAll(".toggle-btn");
-  const counterDisplay = document.getElementById("counter");
-  const incrementBtn = document.getElementById("incrementBtn");
-  const decrementBtn = document.getElementById("decrementBtn");
-  const resetBtn = document.getElementById("resetBtn");
-  const confirmBtn = document.getElementById("confirmBtn");
-  const gobackBtn = document.getElementById("gobackBtn");
-  const reConfirmBtn = document.getElementById("reConfirmBtn");
-  const cancelModalBtn = document.getElementById("cancelModalBtn");
+const port = chrome.runtime.connect({ name: "manage-records-to-background" });
 
-  let UserEmail = '';
-    chrome.storage.local.get(['UserEmail', 'validPopup'], (result) => {
-        UserEmail = result.UserEmail;
-        console.log('UserEmail from storage for popup:', UserEmail, result.validPopup);
-    });
+document.addEventListener("DOMContentLoaded", async () => {
+	const toggleButtons = document.querySelectorAll(".toggle-btn");
+	const counterDisplay = document.getElementById("counter");
+	const incrementBtn = document.getElementById("incrementBtn");
+	const decrementBtn = document.getElementById("decrementBtn");
+	const resetBtn = document.getElementById("resetBtn");
+	const confirmBtn = document.getElementById("confirmBtn");
+	const gobackBtn = document.getElementById("gobackBtn");
+	const reConfirmBtn = document.getElementById("reConfirmBtn");
+	const cancelModalBtn = document.getElementById("cancelModalBtn");
 
-  function clearAllToggles() {
-    toggleButtons.forEach(btn => btn.classList.remove("selected"));
-  }
+	let UserEmail = '';
+	const result = await chrome.storage.local.get(['UserEmail', 'validPopup']);
+	UserEmail = result.UserEmail;
+	console.log("EPIC: UserEmail retrieved from storage:", UserEmail);
 
-  function updateCounter(change) {
-    let current = parseInt(counterDisplay.textContent);
-    const newValue = Math.max(0, current + change);
-    if (newValue !== current) {
-      counterDisplay.textContent = newValue;
-      if (newValue > 0) {
-        clearAllToggles();
-      }
-    }
-  }
+	function clearAllToggles() {
+		toggleButtons.forEach(btn => btn.classList.remove("selected"));
+	}
 
-  toggleButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      if (parseInt(counterDisplay.textContent) !== 0) {
-        counterDisplay.textContent = "0";
-      }
+	function updateCounter(change) {
+		let current = parseInt(counterDisplay.textContent);
+		const newValue = Math.max(0, current + change);
+		if (newValue !== current) {
+			counterDisplay.textContent = newValue;
+			if (newValue > 0) {
+				clearAllToggles();
+			}
+		}
+	}
 
-      clearAllToggles();
-      btn.classList.add("selected");
-    });
-  });
+	toggleButtons.forEach(btn => {
+		btn.addEventListener("click", () => {
+		if (parseInt(counterDisplay.textContent) !== 0) {
+			counterDisplay.textContent = "0";
+		}
 
-  incrementBtn.addEventListener("click", () => updateCounter(1));
-  decrementBtn.addEventListener("click", () => updateCounter(-1));
+		clearAllToggles();
+		btn.classList.add("selected");
+		});
+	});
 
-  resetBtn.addEventListener("click", () => {
-    clearAllToggles();
-    counterDisplay.textContent = "0";
-  });
+	incrementBtn.addEventListener("click", () => updateCounter(1));
+	decrementBtn.addEventListener("click", () => updateCounter(-1));
 
-  confirmBtn.addEventListener("click", async () => {
-    document.getElementById("confirmationModal").classList.remove("hidden");
-  });
+	resetBtn.addEventListener("click", () => {
+		clearAllToggles();
+		counterDisplay.textContent = "0";
+	});
 
-  cancelModalBtn.addEventListener("click", async () => {
-    document.getElementById("confirmationModal").classList.add("hidden");
-  });
+	confirmBtn.addEventListener("click", async () => {
+		document.getElementById("confirmationModal").classList.remove("hidden");
+	});
 
-
-  reConfirmBtn.addEventListener("click", async () => {
-    const selected = [...toggleButtons].find(btn => btn.classList.contains("selected"));
-    const count = parseInt(counterDisplay.textContent);
-    
-    let selectedValue = "";
-    let selectedCategory = "";
-    if (selected) {
-      const text = selected.textContent.trim();
-
-      if (/^Delete ALL /.test(text)) {
-        selectedCategory = text.replace("Delete ALL ", "");
-      } else if (/^Delete Oldest \d+ Records/.test(text)) {
-        const match = text.match(/Delete Oldest (\d+) Records/);
-        selectedValue = match ? match[1] : "";
-      }
-    }
-
-    console.log("Selected Button:", selectedValue, selectedCategory);
-    console.log("Counter Value:", count);
-
-    if (count === 0 && selectedValue === "" && selectedCategory === "") {
-      console.log("No action selected, nothing to apply.");
-      window.close();
-      return;
-    }
-
-    while(UserEmail == '') {
-      console.log("Waiting for UserEmail to be set in  manage_records");
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
-
-    fetch("http://localhost:8000/delete_record", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-            UserEmail: UserEmail,
-            DeleteCount: (selectedValue=="") ? count : parseInt(selectedValue),
-            DeleteCategory: selectedCategory
-        }),
-    })
-    .then((res) => res.json())
-    .then( async (data) => {
-      console.log("Response received from manage_records:", data);
-      document.getElementById("successApplyOverlay").classList.remove("hidden");
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      document.getElementById("successApplyOverlay").classList.add("hidden");
-      window.close();
-    })
-    .catch((err) => {
-      console.error("Error applying prompt from popup:", err);
-    });  
+	cancelModalBtn.addEventListener("click", async () => {
+		document.getElementById("confirmationModal").classList.add("hidden");
+	});
 
 
-  });
+	reConfirmBtn.addEventListener("click", async () => {
+		const selected = [...toggleButtons].find(btn => btn.classList.contains("selected"));
+		const count = parseInt(counterDisplay.textContent);
+		
+		let selectedValue = "";
+		let selectedCategory = "";
+		if (selected) {
+			const text = selected.textContent.trim();
 
-  gobackBtn.addEventListener("click", () => {
-    console.log("Go Back clicked");
-    window.close();
-  });
+			if (/^Delete ALL /.test(text)) {
+				selectedCategory = text.replace("Delete ALL ", "");
+			} else if (/^Delete Oldest \d+ Records/.test(text)) {
+				const match = text.match(/Delete Oldest (\d+) Records/);
+				selectedValue = match ? match[1] : "";
+			}
+		}
+
+		console.log("EPIC: Selected Button:", selectedValue, selectedCategory);
+		console.log("EPIC: Counter Value:", count);
+
+		if (count === 0 && selectedValue === "" && selectedCategory === "") {
+			console.log("EPIC: No action selected, nothing to apply.");
+			window.close();
+			return;
+		}
+
+
+		chrome.runtime.sendMessage({
+			type: "DELETE_RECORDS",
+			payload: {
+				userEmail: UserEmail,
+				deleteCount: (selectedValue=="") ? count : parseInt(selectedValue),
+				deleteCategory: selectedCategory
+			}
+		});
+
+	});
+
+	gobackBtn.addEventListener("click", () => {
+		console.log("Go Back clicked");
+		window.close();
+	});
+});
+
+port.onMessage.addListener(async (message) => {
+	if (message.type === "RECORDS_DELETED") {
+		const successOverlay = document.getElementById("successApplyOverlay");
+		console.log("EPIC: Records deleted successfully:", message.payload);
+
+		successOverlay.classList.remove("hidden");
+		await new Promise(resolve => setTimeout(resolve, 2000));
+		successOverlay.classList.add("hidden");
+		window.close();
+	}
 });
