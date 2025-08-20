@@ -80,7 +80,7 @@ def save_prompt(UserEmail: str, prompt: str):
 
 def delete_records_by_oldest(UserEmail: str, count: int):
     user_db = get_user_db(UserEmail)
-    records = list(user_db[MAILS].find({}).sort("Date", 1).limit(count))
+    records = list(user_db[MAILS].find({}).sort("_id", 1).limit(count))
     delete_count = 0
     if records:
         for record in records:
