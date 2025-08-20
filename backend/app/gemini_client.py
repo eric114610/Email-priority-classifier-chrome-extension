@@ -47,5 +47,4 @@ def generate_mail_class(input: list[ThreadInput], userPrompt:str, processCount: 
     
 
     response = model.generate_content(prompt)
-    print(response.text, prompt)
     return response.text

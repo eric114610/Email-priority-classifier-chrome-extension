@@ -50,7 +50,6 @@ def get_stats(UserEmail: str):
 def update_stats(UserEmail: str, category: str, count: int):
     stats = get_stats(UserEmail)
     stats[category] += count
-    print(f"Updating stats for {UserEmail}: {category} count is now {stats[category]}")
     stats['Total_records'] += count
     db[UserEmail][STATS].update_one({"Email": UserEmail}, {"$set": stats})
     return stats
@@ -86,7 +85,6 @@ def delete_records_by_oldest(UserEmail: str, count: int):
     if records:
         for record in records:
             user_db[MAILS].delete_one({"_id": record["_id"]})
-            print(f"Deleted record: {record}")
             delete_count += 1
             update_stats(UserEmail, record["MailClass"].strip(), -1)
     
