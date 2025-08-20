@@ -1,0 +1,65 @@
+name: CD to Cloud Run for EPIC Backend
+on:
+  # Automatic trigger after CI passes
+  workflow_run:
+    workflows: ["Backend CI"]
+    types:
+      - completed
+    branches: [ "main" ]
+  # Manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment reason (optional)'
+        required: false
+        default: 'Manual deployment for testing'
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Only run if CI workflow succeeded OR if manually triggered
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    steps:
+      # Step 1: Checkout code
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      # Step 2: Authenticate with Google Cloud
+      - name: Google Auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+      
+      # Step 3: Setup gcloud CLI
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: reflected-gamma-468604-p0
+      
+      # Step 4: Configure Docker for Artifact Registry
+      - name: Configure Docker
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+      
+      # Step 5: Build and Push Docker Image
+      - name: Build & Push
+        run: |
+          IMAGE="us-central1-docker.pkg.dev/reflected-gamma-468604-p0/epic-docker/epic_v1:${{ github.sha }}"
+          docker build -t $IMAGE -f deploy/cloudrun.Dockerfile .
+          docker push $IMAGE
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+      
+      # Step 6: Verify image exists
+      - name: Verify image
+        run: gcloud container images describe $IMAGE
+      
+      # Step 7: Deploy to Cloud Run
+      - name: Deploy
+        run: |
+          gcloud run deploy epic-v1 \
+            --image $IMAGE \
+            --platform managed \
+            --region us-central1 \
+            --project reflected-gamma-468604-p0 \
+            --set-env-vars GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }},MONGO_URI=${{ secrets.MONGO_URI }}
+      
