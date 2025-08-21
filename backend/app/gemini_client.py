@@ -48,3 +48,11 @@ def generate_mail_class(input: list[ThreadInput], userPrompt:str, processCount: 
 
     response = model.generate_content(prompt)
     return response.text
+
+def get_gemini_connection():
+    try:
+        genai.list_models()
+        return True
+    except Exception as e:
+        return False
+    

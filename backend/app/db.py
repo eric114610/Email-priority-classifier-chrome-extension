@@ -12,7 +12,7 @@ if not os.getenv("MONGO_URI"):
     load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 client = MongoClient(os.getenv("MONGO_URI"))
-db = client.smartreply
+db = client.epic
 
 def get_user_db(UserEmail: str):
     # Create collections if they don't exist
@@ -107,3 +107,10 @@ def get_records_to_process(UserEmail: str):
 def set_records_to_process(UserEmail: str, count: int):
     db[UserEmail][SETTINGS].update_one({"Email": UserEmail}, {"$set": {"Records_to_process": count}})
     return count
+
+def get_collections():
+    try:
+        db.list_collection_names()
+        return True
+    except Exception as e:
+        return False

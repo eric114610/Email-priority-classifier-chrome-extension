@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 import time
-from backend.app.gemini_client import generate_mail_class
-from backend.app.db import save_thread, query_thread, get_stats, get_user_db, get_prompt, save_prompt, reset_stats, delete_records_by_oldest, delete_records_by_category, get_records_to_process, set_records_to_process
+from backend.app.gemini_client import *
+from backend.app.db import *
 from backend.app.schemas import RecordInput, ThreadInput, UserData, PromptInput, DeleteInput, RecordsToProcessInput
 
 router = APIRouter()
@@ -153,3 +153,10 @@ async def apply_records_to_process(input: RecordsToProcessInput):
     set_records_to_process(input.UserEmail, input.RecordsToProcess)
     print(f"Records to process set to {input.RecordsToProcess} for {input.UserEmail}.")
     return {"message": "Records to process setting applied successfully."}
+
+@router.get("/get_connection")
+async def get_connection():
+    if (get_collections() and get_gemini_connection()):
+        return {"status": True}
+    else:
+        return {"status": False}
