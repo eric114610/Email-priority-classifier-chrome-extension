@@ -10,6 +10,7 @@ if (document.readyState === 'loading') {
 }
 
 async function onDomReady() {
+    chrome.storage.local.set({validPopup: false});
     await new Promise(resolve => setTimeout(resolve, 2000));
     console.log("EPIC: DOM is ready, starting content script");
 
@@ -25,7 +26,7 @@ async function onDomReady() {
 
         if (pStart !== -1 && pEnd !== -1) {
             userEmail = userEmail.substring(pStart + 1, pEnd);
-            chrome.storage.local.set({ userEmail: userEmail, validPopup: false, stats_updated: false });
+            chrome.storage.local.set({ userEmail: userEmail, stats_updated: false });
         } else {
             console.error("EPIC: Failed to extract userEmail from DOM");
             return;
@@ -40,7 +41,11 @@ async function onDomReady() {
         return;
     }
 
-    await confirmConnection();
+    const isConnected = await checkConnection();
+    if (!isConnected) {
+        console.error("EPIC: Failed to connect to the backend, exiting content script");
+        return;
+    }
 
 
     const extractedContactData = [];
@@ -286,7 +291,7 @@ function updateMailHighlights(ClassName) {
 }
 
 
-async function confirmConnection() {
+async function checkConnection() {
     chrome.runtime.sendMessage({
         type: "GET_STATS",
         payload: {
@@ -302,17 +307,18 @@ async function confirmConnection() {
             statsUpdated = result.stats_updated;
         });
         counter++;
-        if (counter > 15) {
-            console.warn("EPIC: Timeout waiting for stats update");
-            break;
+        if (counter > 30) {
+            console.warn("EPIC: Timeout waiting for stats update, connection check failed");
+            return false;
         }
     }
+
+    return true;
 }
 
 
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log("EPIC: Content script received message:", message);
     if (message.Type === "HIGHLIGHT_MAIL_ARRAY") {
         addMailHighlights(message.ClassNameArray);
         applyMailHighlights();

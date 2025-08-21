@@ -1,93 +1,99 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Email Priority Instant Classifier (EPIC)</title>
-  <link rel="stylesheet" href="styles.css">
+	<title>Email Priority Instant Classifier (EPIC)</title>
+	<link rel="stylesheet" href="styles.css">
 </head>
 <body class="popup">
-  <h1>Email Priority Instant Classifier (EPIC)</h1>
+	<h1>Email Priority Instant Classifier (EPIC)</h1>
 
-  <div class="section">
-    <div class="section-title">About</div>
-    <div class="flex-row">
-      <div class="intro-text">
-        <div>Email Priority Instant Classifier (EPIC) helps you classify emails using AI.</div>
-        <div>help you decide which emails to prioritize and which can wait.</div>
-      </div>
-      <button class="btn" id="detailsBtn">Details</button>
-    </div>
-  </div>
+	<div class="section">
+		<div class="section-title">About</div>
+		<div class="flex-row">
+		<div class="intro-text">
+			<div>Email Priority Instant Classifier (EPIC) helps you classify emails using AI.</div>
+			<div>help you decide which emails to prioritize and which can wait.</div>
+		</div>
+		<button class="btn" id="detailsBtn">Details</button>
+		</div>
+	</div>
 
-  <div class="section">
-    <div class="section-title">Record Usage</div>
-    <div class="flex-row">
-      <div class="progress-bar-bg">
-        <div class="progress-bar" id="recordBar" style="width: 0%"></div>
-      </div>
-      <span id="recordCount">0/100</span>
-      <button class="btn" id="manageBtn" disabled>WAITING</button>
-    </div>
-  </div>
+	<div class="section">
+		<div class="section-title">Record Usage</div>
+		<div class="flex-row">
+		<div class="progress-bar-bg">
+			<div class="progress-bar" id="recordBar" style="width: 0%"></div>
+		</div>
+		<span id="recordCount">0/100</span>
+		<button class="btn" id="manageBtn" disabled>WAITING</button>
+		</div>
+	</div>
 
-  <div class="section">
-    <div class="section-title">Categories</div>
-    <ul class="category-list" id="categoryList">
-      <li id="cat-optional">Optional <span class="cat-value">0</span></li>
-      <li id="cat-notable">Notable <span class="cat-value">0</span></li>
-      <li id="cat-important">Important <span class="cat-value">0</span></li>
-      <li id="cat-urgent">Urgent <span class="cat-value">0</span></li>
-      <li id="cat-critical">Critical <span class="cat-value">0</span></li>
-    </ul>
-  </div>
+	<div class="section">
+		<div class="section-title">Categories</div>
+		<ul class="category-list" id="categoryList">
+		<li id="cat-optional">Optional <span class="cat-value">0</span></li>
+		<li id="cat-notable">Notable <span class="cat-value">0</span></li>
+		<li id="cat-important">Important <span class="cat-value">0</span></li>
+		<li id="cat-urgent">Urgent <span class="cat-value">0</span></li>
+		<li id="cat-critical">Critical <span class="cat-value">0</span></li>
+		</ul>
+	</div>
 
-  <div class="section">
-    <div class="section-title"># of records to process</div>
-    <div>Set the number of records to process:</div>
-    <div class="flex-row">
-      <div class="counter-controls">
-        <button class="icon-btn" id="decrementBtn">-</button>
-        <span id="counter">10</span>
-        <button class="icon-btn" id="incrementBtn">+</button>
-      </div>
-      <button class="btn" id="applyRecordsToProcess">WAITING</button>
-    </div>
-  </div>
+	<div class="section">
+		<div class="section-title"># of records to process</div>
+		<div>Set the number of records to process:</div>
+		<div class="flex-row">
+		<div class="counter-controls">
+			<button class="icon-btn" id="decrementBtn">-</button>
+			<span id="counter">10</span>
+			<button class="icon-btn" id="incrementBtn">+</button>
+		</div>
+		<button class="btn" id="applyRecordsToProcess">WAITING</button>
+		</div>
+	</div>
 
-  <div class="section">
-    <div class="section-title">Customize Prompt</div>
-    <div>Set your own prompt for the backend AI (max 100 words):</div>
-    <textarea class="prompt-input" id="promptInput" maxlength="600"></textarea>
-    <div class="bottom-controls">
-      <span class="word-count" id="wordCount">0/100 words</span>
-      <button class="btn" id="applyPromptBtn" disabled>WAITING</button>
-    </div>
-  </div>
+	<div class="section">
+		<div class="section-title">Customize Prompt</div>
+		<div>Set your own prompt for the backend AI (max 100 words):</div>
+		<textarea class="prompt-input" id="promptInput" maxlength="600"></textarea>
+		<div class="bottom-controls">
+		<span class="word-count" id="wordCount">0/100 words</span>
+		<button class="btn" id="applyPromptBtn" disabled>WAITING</button>
+		</div>
+	</div>
 
-  <div id="confirmationModal" class="modal hidden">
-    <div class="modal-content">
-      <p>Your custom prompt is going to be applied.</p>
-      <p>Would you like to re-run all stored mails?</p>
-      <div class="modal-buttons">
-        <button class="btn" id="applyRerun">Apply with re-run</button>
-        <button class="btn" id="applyNoRerun">Apply without re-run </button>
-        <button class="btn" id="cancelApplyBtn">Cancel</button>
-      </div>
-    </div>
-  </div>
+	<div id="confirmationModal" class="modal hidden">
+		<div class="modal-content">
+		<p>Your custom prompt is going to be applied.</p>
+		<p>Would you like to re-run all stored mails?</p>
+		<div class="modal-buttons">
+			<button class="btn" id="applyRerun">Apply with re-run</button>
+			<button class="btn" id="applyNoRerun">Apply without re-run </button>
+			<button class="btn" id="cancelApplyBtn">Cancel</button>
+		</div>
+		</div>
+	</div>
 
-  <div id="loadingOverlay" class="hidden">
-    <div class="loading-content">
-      <div class="spinner"></div>
-      <p class="loading-message">Processing... Please do not close this popup</p>
-    </div>
-  </div>
+	<div id="loadingOverlay" class="hidden">
+		<div class="loading-content">
+		<div class="spinner"></div>
+		<p class="loading-message">Processing... Please do not close this popup</p>
+		</div>
+	</div>
 
-  <div id="successApplyOverlay" class="hidden">
-    <div class="successApply-content">
-      <p class="successApply-message">Apply custom prompt Success!</p>
-    </div>
-  </div>
+	<div id="successApplyOverlay" class="hidden">
+		<div class="successApply-content">
+		<p class="successApply-message">Apply custom prompt Success!</p>
+		</div>
+	</div>
 
-  <script type="module" src="popup.js"></script>
+	<div id="errorOverlay" class="hidden">
+		<div class="error-content">
+		<p class="error-message">Failed to establish connection!</p>
+		</div>
+	</div>
+
+	<script type="module" src="popup.js"></script>
 </body>
 </html>

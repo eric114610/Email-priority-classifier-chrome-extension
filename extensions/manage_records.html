@@ -1,63 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>EPIC Record Management</title>
-  <link rel="stylesheet" href="styles.css">
+	<meta charset="UTF-8" />
+	<title>EPIC Record Management</title>
+	<link rel="stylesheet" href="styles.css">
 </head>
 <body class="manage">
-  <h1>Manage EPIC Records</h1>
+	<h1>Manage EPIC Records</h1>
 
-  <div class="section explanation">
-    <div class="section-title">How it Works</div>
-    <p>Use the buttons below to select one of the options.</p>
-    <p>Only one option among all can be selected at a time.</p>
-    <p>Or use the counter to input a numeric option instead.</p>
-  </div>
+	<div class="section explanation">
+		<div class="section-title">How it Works</div>
+		<p>Use the buttons below to select one of the options.</p>
+		<p>Only one option among all can be selected at a time.</p>
+		<p>Or use the counter to input a numeric option instead.</p>
+	</div>
 
-  <div class="section">
-    <div class="button-grid" id="section1">
-      <button class="toggle-btn">Delete ALL Optional</button>
-      <button class="toggle-btn">Delete ALL Notable</button>
-      <button class="toggle-btn">Delete ALL Important</button>
-      <button class="toggle-btn">Delete ALL Urgent</button>
-      <button class="toggle-btn">Delete ALL Critical</button>
-      <button class="toggle-btn">Delete Oldest 5 Records</button>
-      <button class="toggle-btn">Delete Oldest 10 Records</button>
-      <button class="toggle-btn">Delete Oldest 25 Records</button>
-      <button class="toggle-btn">Delete Oldest 50 Records</button>
-    </div>
+	<div class="section">
+		<div class="button-grid" id="section1">
+		<button class="toggle-btn">Delete ALL Optional</button>
+		<button class="toggle-btn">Delete ALL Notable</button>
+		<button class="toggle-btn">Delete ALL Important</button>
+		<button class="toggle-btn">Delete ALL Urgent</button>
+		<button class="toggle-btn">Delete ALL Critical</button>
+		<button class="toggle-btn">Delete Oldest 5 Records</button>
+		<button class="toggle-btn">Delete Oldest 10 Records</button>
+		<button class="toggle-btn">Delete Oldest 25 Records</button>
+		<button class="toggle-btn">Delete Oldest 50 Records</button>
+		</div>
 
-    <div class="counter-controls">
-      <button class="icon-btn" id="decrementBtn">-</button>
-      <span id="counter">0</span>
-      <button class="icon-btn" id="incrementBtn">+</button>
-    </div>
-  </div>
+		<div class="counter-controls">
+		<button class="icon-btn" id="decrementBtn">-</button>
+		<span id="counter">0</span>
+		<button class="icon-btn" id="incrementBtn">+</button>
+		</div>
+	</div>
 
-  <div class="section action-buttons">
-    <button class="action-btn confirm-btn" id="confirmBtn">Confirm</button>
-    <button class="action-btn reset-btn" id="resetBtn">Reset</button>
-    <button class="action-btn goback-btn" id="gobackBtn">Go Back</button>
-  </div>
+	<div class="section action-buttons">
+		<button class="action-btn confirm-btn" id="confirmBtn">Confirm</button>
+		<button class="action-btn reset-btn" id="resetBtn">Reset</button>
+		<button class="action-btn goback-btn" id="gobackBtn">Go Back</button>
+	</div>
 
-  <div id="confirmationModal" class="modal hidden">
-    <div class="modal-content">
-      <p>Are you sure you want to delete these records?</p>
-      <p>Deletion cannot be undo.</p>
-      <div class="modal-buttons">
-        <button class="btn" id="reConfirmBtn">Confirm</button>
-        <button class="btn" id="cancelModalBtn">Cancel</button>
-      </div>
-    </div>
-  </div>
+	<div id="confirmationModal" class="modal hidden">
+		<div class="modal-content">
+		<p>Are you sure you want to delete these records?</p>
+		<p>Deletion cannot be undo.</p>
+		<div class="modal-buttons">
+			<button class="btn" id="reConfirmBtn">Confirm</button>
+			<button class="btn" id="cancelModalBtn">Cancel</button>
+		</div>
+		</div>
+	</div>
 
-  <div id="successApplyOverlay" class="hidden">
-    <div class="successApply-content">
-      <p class="successApply-message">Deletion success!</p>
-    </div>
-  </div>
+	<div id="successApplyOverlay" class="hidden">
+		<div class="successApply-content">
+		<p class="successApply-message">Deletion success!</p>
+		</div>
+	</div>
 
-  <script src="manage_records.js"></script>
+	<div id="loadingOverlay" class="hidden">
+		<div class="loading-content">
+		<div class="spinner"></div>
+		<p class="loading-message">Processing... Please do not close this window</p>
+		</div>
+	</div>
+
+	<script src="manage_records.js"></script>
 </body>
 </html>

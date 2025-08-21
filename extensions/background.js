@@ -8,8 +8,14 @@ let manageRecordsPort = null;
 chrome.runtime.onConnect.addListener((port) => {
 	if (port.name === "popup-to-background") {
 		popupPort = port;
+		popupPort.onDisconnect.addListener(() => {
+            popupPort = null;
+        });
 	} else if (port.name === "manage-records-to-background") {
 		manageRecordsPort = port;
+		manageRecordsPort.onDisconnect.addListener(() => {
+            manageRecordsPort = null;
+        });
 	}
 });
 
@@ -160,11 +166,11 @@ chrome.runtime.onMessage.addListener( (msg, sender, sendResponse) => {
 	} else if (msg.type === "GET_STATS") {
 
 		fetch(SERVER_URL+"/get_stats", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ 
-			Email: msg.payload.email,
-		}),
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ 
+				Email: msg.payload.email,
+			}),
 		})
 		.then((res) => res.json())
 		.then((data) => {
@@ -177,7 +183,6 @@ chrome.runtime.onMessage.addListener( (msg, sender, sendResponse) => {
 		chrome.storage.local.set({ UserEmail: msg.payload.email });
 		console.log("EPIC: Background script updated UserEmail:", msg.payload.email);
 	} else if (msg.type === "GET_INIT_DATA") {
-		console.log("EPIC: Background script received GET_INIT_DATA request for email:", msg.payload.email);
 		fetch(SERVER_URL+"/get_stats", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -187,13 +192,14 @@ chrome.runtime.onMessage.addListener( (msg, sender, sendResponse) => {
 		})
 		.then((res) => res.json())
 		.then((data) => {
-			popupPort.postMessage({ type:"INIT_DATA", userData: data });
+			if (popupPort) {
+				popupPort.postMessage({ type:"INIT_DATA", userData: data });
+			}
 		})
 		.catch((err) => {
 			console.error("EPIC: Error fetching from backend in GET_INIT_DATA:", err);
 		});
   	} else if (msg.type === "GET_DATA") {
-		console.log("EPIC: Background script received GET_DATA request for email:", msg.payload.email);
 		fetch(SERVER_URL+"/get_stats", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -203,13 +209,14 @@ chrome.runtime.onMessage.addListener( (msg, sender, sendResponse) => {
 		})
 		.then((res) => res.json())
 		.then((data) => {
-			popupPort.postMessage({ type:"GET_DATA", userData: data });
+			if (popupPort) {
+				popupPort.postMessage({ type:"GET_DATA", userData: data });
+			}
 		})
 		.catch((err) => {
 			console.error("EPIC: Error fetching from backend in GET_DATA:", err);
 		});
   	} else if (msg.type === "APPLY_RECORDS_TO_PROCESS") {
-		console.log("EPIC: Background script received APPLY_RECORDS_TO_PROCESS request with data:", msg.payload);
 		fetch(SERVER_URL+"/apply_records_to_process", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -220,14 +227,14 @@ chrome.runtime.onMessage.addListener( (msg, sender, sendResponse) => {
 		})
 		.then((res) => res.json())
 		.then((data) => {
-			console.log("EPIC: Response from apply_records_to_process:", data);
-			popupPort.postMessage({ type: "RECORDS_APPLIED", status: (data != null) });
+			if (popupPort) {
+				popupPort.postMessage({ type: "RECORDS_APPLIED", status: (data != null) });
+			}
 		})
 		.catch((err) => {
 			console.error("EPIC: Error fetching from backend in APPLY_RECORDS_TO_PROCESS:", err);
 		});
 	} else if (msg.type === "APPLY_CUSTOM_PROMPT") {
-		console.log("EPIC: Background script received APPLY_RECORDS_TO_PROCESS request with data:", msg.payload);
 		fetch(SERVER_URL+"/apply_custom_prompt", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -239,14 +246,14 @@ chrome.runtime.onMessage.addListener( (msg, sender, sendResponse) => {
 		})
 		.then((res) => res.json())
 		.then((data) => {
-			console.log("EPIC: Response from apply_custom_prompt:", data);
-			popupPort.postMessage({ type: "PROMPT_APPLIED", status: (data != null), reRun: msg.payload.reRun });
+			if (popupPort) {
+				popupPort.postMessage({ type: "PROMPT_APPLIED", status: (data != null), reRun: msg.payload.reRun });
+			}
 		})
 		.catch((err) => {
 			console.error("EPIC: Error fetching from backend in APPLY_CUSTOM_PROMPT:", err);
 		});
 	} else if (msg.type === "DELETE_RECORDS") {
-		console.log("EPIC: Background script received DELETE_RECORDS request with data:", msg.payload);
 		fetch(SERVER_URL+"/delete_record", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -258,13 +265,31 @@ chrome.runtime.onMessage.addListener( (msg, sender, sendResponse) => {
 		})
 		.then((res) => res.json())
 		.then((data) => {
-			console.log("EPIC: Response from delete_record:", data);
-			manageRecordsPort.postMessage({ type: "RECORDS_DELETED", status: (data != null)});
+			if (manageRecordsPort) {
+				manageRecordsPort.postMessage({ type: "RECORDS_DELETED", status: (data != null)});
+			}
 		})
 		.catch((err) => {
 			console.error("EPIC: Error fetching from backend in APPLY_CUSTOM_PROMPT:", err);
 		});
-	}
+	} else if (msg.type === "CHECK_CONNECTION") {
+		fetch(SERVER_URL+"/get_connection", {
+			method: "GET",
+			headers: { "Content-Type": "application/json" },
+		})
+		.then((res) => res.json())
+		.then((data) => {
+			if (popupPort) {
+				popupPort.postMessage({ type: "CHECK_CONNECTION", status: data.status });
+			}
+		})
+		.catch((err) => {
+			console.error("EPIC: Error checking connection:", err);
+			if (popupPort) {
+				popupPort.postMessage({ type: "CHECK_CONNECTION", status: false });
+			}
+		});
+  	}
 
 });
 

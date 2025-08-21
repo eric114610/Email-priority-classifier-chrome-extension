@@ -25,6 +25,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 	const loadingOverlay = document.getElementById("loadingOverlay");
 	const successApplyOverlay = document.getElementById("successApplyOverlay");
 
+	chrome.runtime.sendMessage({
+		type: "CHECK_CONNECTION",
+	});
+
 	const result = await chrome.storage.local.get(['UserEmail', 'validPopup']);
 	UserEmail = result.UserEmail;
 	validPopupStorage = result.validPopup;
@@ -265,7 +269,7 @@ port.onMessage.addListener(async (message) => {
 	} else if (message.type === "RECORDS_APPLIED") {
 		const successApplyOverlay = document.getElementById("successApplyOverlay");
 		const successMessage = successApplyOverlay.querySelector('.successApply-message');
-		successMessage.textContent = "Apply records to process Success!";
+		successMessage.textContent = "Apply records to process Success! Reload the page to see changes.";
 		console.log("EPIC: Received APPLY_RECORDS_TO_PROCESS from background script:", message.status);
 
 		successApplyOverlay.classList.remove("hidden");
@@ -323,6 +327,12 @@ port.onMessage.addListener(async (message) => {
 			successApplyOverlay.classList.remove("hidden");
 			await new Promise(resolve => setTimeout(resolve, 2000));
 			successApplyOverlay.classList.add("hidden");
+		}
+	} else if (message.type === "CHECK_CONNECTION") {
+		console.log("EPIC: Connection check result:", message.status);
+		if (!message.status) {
+			const errorOverlay = document.getElementById("errorOverlay");
+			errorOverlay.classList.remove("hidden");
 		}
 	}
 });

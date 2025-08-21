@@ -6,21 +6,41 @@ body.learn-more {
   padding: 20px;
   background: linear-gradient(to bottom right, #e3f2fd, #fce4ec);
   color: #333;
+  box-sizing: border-box;
 }
 
+/* Keep popup as fixed size for Chrome extension */
 body.popup {
   width: 380px;
   padding: 16px;
+  min-height: auto;
 }
 
-body.manage {
-  width: 360px;
-  padding: 20px;
-}
-
+/* Make standalone pages responsive and centered */
+body.manage,
 body.learn-more {
-  max-width: 600px;
-  padding: 24px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Container wrapper for centering content - only for standalone pages */
+body.manage .page-container,
+body.learn-more .page-container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* Responsive width adjustments for standalone pages */
+body.manage .page-container {
+  max-width: 420px;
+}
+
+body.learn-more .page-container {
+  max-width: 700px;
 }
 
 /* Reset only for popup windows */
@@ -44,18 +64,29 @@ body.learn-more * {
   box-sizing: border-box;
 }
 
-/* Main heading */
+/* Main heading - fixed size for popup, responsive for others */
 h1 {
-  font-size: 1.6em;
   margin-bottom: 20px;
   text-align: center;
   color: #1976d2;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 }
 
+/* Larger fixed size for popup */
+body.popup h1 {
+  font-size: 1.7em;
+}
+
+/* Larger responsive size for standalone pages */
+body.manage h1,
+body.learn-more h1 {
+  font-size: clamp(1.6em, 4vw, 2em);
+  width: 100%;
+}
+
 /* Large heading for learn more page */
 h1.large {
-  font-size: 2em;
+  font-size: clamp(1.8em, 5vw, 2.4em);
   margin-bottom: 24px;
 }
 
@@ -70,6 +101,7 @@ h1.large {
   -webkit-backdrop-filter: blur(6px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   transition: box-shadow 0.2s ease;
+  width: 100%;
 }
 
 .section:hover {
@@ -88,42 +120,83 @@ h1.large {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
 }
 
-/* Section Titles */
+/* Section Titles - fixed for popup, responsive for others */
 .section-title {
   font-weight: 600;
-  font-size: 1.1em;
   margin-bottom: 10px;
   color: #1565c0;
 }
 
-.section-title.large {
+/* Larger fixed size for popup */
+body.popup .section-title {
   font-size: 1.2em;
 }
 
-/* Text Styles */
+/* Larger responsive size for standalone pages */
+body.manage .section-title,
+body.learn-more .section-title {
+  font-size: clamp(1.1em, 3vw, 1.25em);
+}
+
+.section-title.large {
+  font-size: clamp(1.2em, 3.5vw, 1.4em);
+}
+
+/* Text Styles - fixed for popup, responsive for others */
 p {
-  font-size: 0.95em;
   line-height: 1.5;
   margin-bottom: 8px;
+}
+
+/* Larger fixed size for popup */
+body.popup p {
+  font-size: 1em;
+}
+
+/* Larger responsive size for standalone pages */
+body.manage p,
+body.learn-more p {
+  font-size: clamp(0.95em, 2.5vw, 1.05em);
 }
 
 .intro-text {
   flex: 1;
-  font-size: 0.95em;
   line-height: 1.5;
   color: #444;
 }
 
+/* Larger fixed size for popup */
+body.popup .intro-text {
+  font-size: 1em;
+}
+
+/* Larger responsive size for standalone pages */
+body.manage .intro-text,
+body.learn-more .intro-text {
+  font-size: clamp(0.95em, 2.5vw, 1.05em);
+}
+
 .explanation p {
-  font-size: 0.95em;
   line-height: 1.5;
   margin-bottom: 8px;
+}
+
+/* Larger fixed size for popup */
+body.popup .explanation p {
+  font-size: 1em;
+}
+
+/* Larger responsive size for standalone pages */
+body.manage .explanation p,
+body.learn-more .explanation p {
+  font-size: clamp(0.95em, 2.5vw, 1.05em);
 }
 
 /* Learn more page specific text */
 .learn-more-text {
   line-height: 1.6;
   margin-bottom: 10px;
+  font-size: clamp(0.95em, 2.5vw, 1.1em);
 }
 
 strong {
@@ -139,7 +212,7 @@ strong {
   flex-wrap: wrap;
 }
 
-/* Button Styles */
+/* Button Styles - fixed for popup, responsive for others */
 .btn {
   padding: 6px 14px;
   border: none;
@@ -148,8 +221,19 @@ strong {
   color: #fff;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 0.9em;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Larger fixed size for popup */
+body.popup .btn {
+  font-size: 0.95em;
+}
+
+/* Larger responsive size for standalone pages */
+body.manage .btn,
+body.learn-more .btn {
+  font-size: clamp(0.9em, 2.2vw, 1em);
+  min-height: 36px;
 }
 
 .btn:hover {
@@ -169,16 +253,31 @@ strong {
   justify-content: space-between;
   gap: 10px;
   margin-top: 20px;
+  flex-wrap: wrap;
 }
 
 .action-btn {
   flex: 1;
-  padding: 8px 12px;
-  font-size: 0.95em;
+  min-flex: 0;
+  padding: 10px 12px;
   border: none;
   border-radius: 12px;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  min-width: 80px;
+}
+
+/* Fixed size for popup */
+body.popup .action-btn {
+  font-size: 0.95em;
+  min-height: 40px;
+}
+
+/* Larger responsive size for standalone pages */
+body.manage .action-btn,
+body.learn-more .action-btn {
+  font-size: clamp(0.95em, 2.5vw, 1.05em);
+  min-height: 44px;
 }
 
 .action-btn:hover {
@@ -200,21 +299,60 @@ strong {
   color: white;
 }
 
-/* Toggle Buttons */
+/* Toggle Buttons - fixed grid for popup, responsive for others */
 .button-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
   gap: 8px;
+  width: 100%;
+}
+
+/* Fixed grid for popup */
+body.popup .button-grid {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+/* Responsive grid for standalone pages - larger minimum width for manage page */
+body.manage .button-grid {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+body.learn-more .button-grid {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
 }
 
 .toggle-btn {
   padding: 6px;
-  font-size: 0.9em;
   border-radius: 10px;
   border: 1px solid #bbb;
   background: white;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Fixed size for popup */
+body.popup .toggle-btn {
+  font-size: 0.9em;
+}
+
+/* Responsive size for standalone pages */
+body.manage .toggle-btn {
+  padding: 10px 8px;
+  font-size: clamp(0.85em, 2vw, 0.95em);
+  min-height: 45px;
+  white-space: normal;
+  line-height: 1.2;
+  text-align: center;
+}
+
+body.learn-more .toggle-btn {
+  padding: 8px 6px;
+  font-size: clamp(0.8em, 2vw, 0.9em);
+  min-height: 40px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .toggle-btn:hover {
@@ -238,13 +376,18 @@ strong {
 
 .icon-btn {
   background: #e0e0e0;
-  font-size: 1.2em;
-  padding: 6px 12px;
+  font-size: clamp(1em, 3vw, 1.2em);
+  padding: 8px 12px;
   border: none;
   border-radius: 50%;
   cursor: pointer;
   font-weight: bold;
   transition: background-color 0.2s ease;
+  min-width: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .icon-btn:hover {
@@ -252,9 +395,9 @@ strong {
 }
 
 #counter {
-  font-size: 1.2em;
+  font-size: clamp(1.1em, 3vw, 1.2em);
   font-weight: bold;
-  min-width: 24px;
+  min-width: 40px;
   text-align: center;
 }
 
@@ -266,6 +409,7 @@ strong {
   border-radius: 8px;
   overflow: hidden;
   position: relative;
+  min-width: 100px;
 }
 
 .progress-bar {
@@ -289,7 +433,7 @@ strong {
 }
 
 #recordCount {
-  font-size: 0.9em;
+  font-size: clamp(0.85em, 2.2vw, 0.9em);
   color: #444;
   min-width: 60px;
   text-align: right;
@@ -311,7 +455,7 @@ strong {
   justify-content: space-between;
   align-items: center;
   font-weight: 500;
-  font-size: 0.95em;
+  font-size: clamp(0.9em, 2.5vw, 0.95em);
   box-shadow: 0 1px 5px rgba(0,0,0,0.1);
 }
 
@@ -373,7 +517,7 @@ strong {
   border: 1px solid #ccc;
   border-radius: 10px;
   padding: 10px;
-  font-size: 0.95em;
+  font-size: clamp(0.9em, 2.5vw, 0.95em);
   margin-top: 6px;
   resize: vertical;
   background: #fff;
@@ -382,7 +526,7 @@ strong {
 }
 
 .word-count {
-  font-size: 0.85em;
+  font-size: clamp(0.8em, 2.2vw, 0.85em);
   color: #666;
   margin-top: 6px;
 }
@@ -392,6 +536,8 @@ strong {
   justify-content: space-between;
   align-items: center;
   margin-top: 8px;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 /* Modal Styles */
@@ -406,6 +552,7 @@ strong {
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  padding: 20px;
 }
 
 .modal-content {
@@ -414,7 +561,7 @@ strong {
   border-radius: 8px;
   text-align: center;
   max-width: 400px;
-  width: 90%;
+  width: 100%;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
@@ -437,6 +584,7 @@ strong {
   z-index: 2000;
   justify-content: center;
   align-items: center;
+  padding: 20px;
 }
 
 .overlay:not(.hidden) {
@@ -453,12 +601,14 @@ strong {
   z-index: 2000;
   justify-content: center;
   align-items: center;
+  padding: 20px;
 }
 
 #loadingOverlay:not(.hidden) {
   display: flex;
 }
 
+#errorOverlay,
 #successApplyOverlay {
   position: fixed;
   top: 0;
@@ -469,26 +619,32 @@ strong {
   z-index: 2000;
   justify-content: center;
   align-items: center;
+  padding: 20px;
 }
 
+#errorOverlay:not(.hidden),
 #successApplyOverlay:not(.hidden) {
   display: flex;
 }
 
 /* Overlay Content */
+.error-content,
 .loading-content,
 .successApply-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
+  max-width: 90%;
 }
 
+.error-message,
 .loading-message,
 .successApply-message {
-  font-size: 1.2em;
+  font-size: clamp(1em, 3vw, 1.2em);
   color: #333;
   font-family: Arial, sans-serif;
+  text-align: center;
 }
 
 /* Loading Spinner */
@@ -496,8 +652,8 @@ strong {
   border: 8px solid #f3f3f3;
   border-top: 8px solid #3498db;
   border-radius: 50%;
-  width: 60px;
-  height: 60px;
+  width: clamp(40px, 10vw, 60px);
+  height: clamp(40px, 10vw, 60px);
   animation: spin 1s linear infinite;
 }
 
@@ -511,30 +667,58 @@ strong {
   display: none;
 }
 
-/* Responsive Design */
-@media (max-width: 480px) {
-  body {
+/* Mobile-first responsive design - only affects standalone pages */
+@media (max-width: 768px) {
+  body.manage,
+  body.learn-more {
     padding: 16px;
   }
 
-  h1 {
-    font-size: 1.4em;
-  }
-
-  h1.large {
-    font-size: 1.6em;
-  }
-
-  .section {
+  body.manage .section,
+  body.learn-more .section {
     padding: 14px;
+    margin-bottom: 16px;
   }
 
-  .section.large {
+  body.manage .section.large,
+  body.learn-more .section.large {
     padding: 16px;
+    margin-bottom: 20px;
   }
 
-  .button-grid {
-    grid-template-columns: repeat(3, 1fr);
+  body.manage .button-grid,
+  body.learn-more .button-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 6px;
+  }
+
+  body.manage .toggle-btn {
+    font-size: 0.85em;
+    padding: 8px 6px;
+    min-height: 42px;
+  }
+
+  body.learn-more .toggle-btn {
+    font-size: 0.8em;
+    padding: 6px 4px;
+  }
+
+  body.manage .action-buttons,
+  body.learn-more .action-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  body.manage .action-btn,
+  body.learn-more .action-btn {
+    min-height: 44px;
+  }
+
+  body.manage .flex-row,
+  body.learn-more .flex-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
   }
 
   .modal-buttons {
@@ -542,24 +726,51 @@ strong {
     gap: 8px;
   }
 
-  .flex-row {
-    flex-direction: column;
-    align-items: stretch;
+  .modal-content {
+    padding: 20px;
+    margin: 0 10px;
   }
 }
 
-/* Page-specific body widths */
-body.popup {
-  width: 380px;
-  padding: 16px;
+@media (max-width: 480px) {
+  body.manage,
+  body.learn-more {
+    padding: 12px;
+  }
+
+  body.manage .button-grid,
+  body.learn-more .button-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  body.manage .counter-controls,
+  body.learn-more .counter-controls {
+    gap: 8px;
+  }
+
+  body.manage .progress-bar-bg,
+  body.learn-more .progress-bar-bg {
+    min-width: 80px;
+  }
 }
 
-body.manage {
-  width: 360px;
-  padding: 20px;
-}
+/* Large screen optimizations - only affects standalone pages */
+@media (min-width: 1200px) {
+  body.manage .page-container {
+    max-width: 500px;
+  }
 
-body.learn-more {
-  max-width: 600px;
-  padding: 24px;
+  body.learn-more .page-container {
+    max-width: 800px;
+  }
+
+  body.manage .section,
+  body.learn-more .section {
+    padding: 20px;
+  }
+
+  body.manage .section.large,
+  body.learn-more .section.large {
+    padding: 24px;
+  }
 }

@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	const gobackBtn = document.getElementById("gobackBtn");
 	const reConfirmBtn = document.getElementById("reConfirmBtn");
 	const cancelModalBtn = document.getElementById("cancelModalBtn");
+	const loadingOverlay = document.getElementById("loadingOverlay");
 
 	let UserEmail = '';
 	const result = await chrome.storage.local.get(['UserEmail', 'validPopup']);
@@ -95,6 +96,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 			}
 		});
 
+		loadingOverlay.classList.remove("hidden");
+
 	});
 
 	gobackBtn.addEventListener("click", () => {
@@ -105,9 +108,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 port.onMessage.addListener(async (message) => {
 	if (message.type === "RECORDS_DELETED") {
+		const loadingOverlay = document.getElementById("loadingOverlay");
 		const successOverlay = document.getElementById("successApplyOverlay");
 		console.log("EPIC: Records deleted successfully:", message.payload);
 
+		loadingOverlay.classList.add("hidden");
 		successOverlay.classList.remove("hidden");
 		await new Promise(resolve => setTimeout(resolve, 2000));
 		successOverlay.classList.add("hidden");
