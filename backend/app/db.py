@@ -37,7 +37,8 @@ def query_thread(input: ThreadInput, UserEmail: str):
 
 def save_thread(input: ThreadInput, UserEmail: str, MailClass: str):
     db[UserEmail][MAILS].insert_one({"Name": input.Name, "Email": input.Email, "Subject": input.Subject, "Preview": input.Preview, "MailClass": MailClass, "Date": input.Date})
-    update_stats(UserEmail, MailClass.strip(), 1)
+    MailClass = MailClass.strip()
+    update_stats(UserEmail, MailClass, 1)
 
 def get_stats(UserEmail: str):
     stats = db[UserEmail][STATS].find_one({"Email": UserEmail})
@@ -86,7 +87,8 @@ def delete_records_by_oldest(UserEmail: str, count: int):
         for record in records:
             user_db[MAILS].delete_one({"_id": record["_id"]})
             delete_count += 1
-            update_stats(UserEmail, record["MailClass"].strip(), -1)
+            record["MailClass"] = record["MailClass"].strip()
+            update_stats(UserEmail, record["MailClass"], -1)
     
     return delete_count
 
