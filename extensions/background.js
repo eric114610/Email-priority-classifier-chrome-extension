@@ -105,7 +105,6 @@ chrome.runtime.onMessage.addListener( (msg, sender, sendResponse) => {
           });
 
         console.log("EPIC: Background script received extracted data and complated");
-        chrome.storage.local.set({ validPopup: true });
 
     });
   

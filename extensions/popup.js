@@ -9,6 +9,7 @@ const port = chrome.runtime.connect({ name: "popup-to-background" });
 
 
 document.addEventListener('DOMContentLoaded', async () => {
+	await new Promise(resolve => setTimeout(resolve, 2000));
     const detailsBtn = document.getElementById("detailsBtn");
 	const manageBtn = document.getElementById("manageBtn");
 	const applyPromptBtn = document.getElementById("applyPromptBtn");

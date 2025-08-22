@@ -1,6 +1,9 @@
 let PAUSED = false;
 let userEmail = '';
 let lastHighlights = new Map();
+let emailObserver = null;
+
+chrome.storage.local.set({validPopup: false});
 
 if (document.readyState === 'loading') {
   console.log("EPIC: DOM is not ready, waiting for it to load");
@@ -10,7 +13,6 @@ if (document.readyState === 'loading') {
 }
 
 async function onDomReady() {
-    chrome.storage.local.set({validPopup: false});
     await new Promise(resolve => setTimeout(resolve, 2000));
     console.log("EPIC: DOM is ready, starting content script");
 
@@ -125,49 +127,86 @@ async function onDomReady() {
         return;
     }
 
+    attachEmailObserver();
 
+};
+
+
+
+function attachEmailObserver() {
+    // Disconnect existing observer if any
+    if (emailObserver) {
+        emailObserver.disconnect();
+        console.log("EPIC: Disconnected previous observer");
+    }
+    
     const mailTable = document.querySelector('.F.cf.zt');
-    const emailObserver = new MutationObserver((mutationsList) => {
+    
+    if (!mailTable) {
+        console.error("EPIC: Mail table not found, cannot observe for new email rows");
+        return;
+    }
+    
+    emailObserver = new MutationObserver((mutationsList) => {
         if (PAUSED) {
             console.log("EPIC: Content script is paused, skipping email row mutation detection");
             return;
         }
-
-        console.log("Email row mutation detected");
+        
+        
         for (const mutation of mutationsList) {
             for (const node of mutation.addedNodes) {
                 if (node.nodeType === 1 && node.matches('.zA.zE')) {
-                    let tmpEmail = node.querySelector('.bA4').querySelector('span[email]').getAttribute('email');
-                    let tmpName = node.querySelector('.bA4').querySelector('span[email]').getAttribute('name');
-                    let tmpSubject = node.querySelector('.bog').querySelector('span').textContent;
-                    let tmpPreview = node.querySelector('.y2').textContent;
-                    let tmpDate = node.querySelector('.xW.xY').querySelector('span').getAttribute('title');
-                    console.log("New email row detected:", tmpEmail, tmpName, tmpSubject, tmpPreview);
-
-                    chrome.runtime.sendMessage({
-                        type: "NEW_MAIL_DATA",
-                        payload: {
-                            email: tmpEmail,
-                            name: tmpName,
-                            subject: tmpSubject,
-                            preview: tmpPreview,
-                            date: tmpDate,
-                            userEmail: userEmail
+                    try {
+                        const senderElement = node.querySelector('.bA4 span[email]');
+                        const subjectElement = node.querySelector('.bog span');
+                        const previewElement = node.querySelector('.y2');
+                        const dateElement = node.querySelector('.xW.xY span[title]');
+                        
+                        if (!senderElement || !subjectElement || !previewElement || !dateElement) {
+                            console.warn("EPIC: Some email elements not found, skipping this email row");
+                            continue;
                         }
-                    });
-
+                        
+                        const tmpEmail = senderElement.getAttribute('email');
+                        const tmpName = senderElement.getAttribute('name');
+                        const tmpSubject = subjectElement.textContent;
+                        const tmpPreview = previewElement.textContent;
+                        const tmpDate = dateElement.getAttribute('title');
+                        
+                        if (!tmpEmail || !tmpSubject) {
+                            console.warn("EPIC: Missing essential email data, skipping this email row");
+                            continue;
+                        }
+                        
+                        console.log("EPIC: New email row detected:", tmpEmail, tmpName, tmpSubject, tmpPreview);
+                        
+                        chrome.runtime.sendMessage({
+                            type: "NEW_MAIL_DATA",
+                            payload: {
+                                email: tmpEmail,
+                                name: tmpName || '',
+                                subject: tmpSubject,
+                                preview: tmpPreview || '',
+                                date: tmpDate || '',
+                                userEmail: userEmail
+                            }
+                        });
+                        
+                        console.log("EPIC: Re-attaching observer after processing email");
+                        setTimeout(attachEmailObserver, 100);
+                        
+                    } catch (error) {
+                        console.error("EPIC: Error processing email row:", error);
+                    }
                 }
             }
         }
     });
-
-    if (mailTable) {
-        emailObserver.observe(mailTable, { childList: true, subtree: true });
-    } else {
-        console.error("EPIC: Mail table not found, cannot observe for new email rows");
-    }
-
-};
+    
+    emailObserver.observe(mailTable, { childList: true, subtree: true });
+    console.log("EPIC: Email observer attached successfully");
+}
 
 
 function isCorrectTable() {
@@ -275,17 +314,12 @@ function updateMailHighlights(ClassName) {
         if(Number(ID) == 49)
             continue;
         tmpMap.set(Number(ID)+1, className);
-        console.log("Old Map:", ID, className);
     }
 
     removeMailHighlights();
 
     tmpMap.set(0, ClassName)
-
     lastHighlights = tmpMap;
-    for (const [ID, className] of lastHighlights.entries()) {
-        console.log("New Map:", ID, className);
-    }
 
     applyMailHighlights();
 }
@@ -322,6 +356,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.Type === "HIGHLIGHT_MAIL_ARRAY") {
         addMailHighlights(message.ClassNameArray);
         applyMailHighlights();
+        chrome.storage.local.set({ validPopup: true });
     } else if (message.Type === "NEW_HIGHLIGHT_MAIL") {
         updateMailHighlights(message.ClassName);
     }else if (message.Type === "PAUSE_CONTENT_SCRIPT") {
