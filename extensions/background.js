@@ -179,7 +179,7 @@ chrome.runtime.onMessage.addListener( (msg, sender, sendResponse) => {
 			console.error("EPIC: Error fetching from backend in GET_STATS:", err);
 		});
 	} else if (msg.type === "UPDATE_USER_EMAIL") {
-		chrome.storage.local.set({ UserEmail: msg.payload.email });
+		chrome.storage.local.set({ userEmail: msg.payload.email });
 		console.log("EPIC: Background script updated UserEmail:", msg.payload.email);
 	} else if (msg.type === "GET_INIT_DATA") {
 		fetch(SERVER_URL+"/get_stats", {

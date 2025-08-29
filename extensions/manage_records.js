@@ -13,8 +13,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 	const loadingOverlay = document.getElementById("loadingOverlay");
 
 	let UserEmail = '';
-	const result = await chrome.storage.local.get(['UserEmail', 'validPopup']);
-	UserEmail = result.UserEmail;
+	const result = await chrome.storage.local.get(['userEmail', 'validPopup']);
+	UserEmail = result.userEmail;
 	console.log("EPIC: UserEmail retrieved from storage:", UserEmail);
 
 	function clearAllToggles() {

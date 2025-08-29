@@ -30,8 +30,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 		type: "CHECK_CONNECTION",
 	});
 
-	const result = await chrome.storage.local.get(['UserEmail', 'validPopup']);
-	UserEmail = result.UserEmail;
+	const result = await chrome.storage.local.get(['userEmail', 'validPopup']);
+	UserEmail = result.userEmail;
 	validPopupStorage = result.validPopup;
 	console.log('EPIC: From storage for popup:', UserEmail, result.validPopup);
 
