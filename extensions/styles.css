@@ -510,6 +510,10 @@ body.learn-more .toggle-btn {
   color: #ab47bc !important;
 }
 
+.unknown-reply-color {
+  color: #1a1d48 !important;
+}
+
 /* Form Elements */
 .prompt-input {
   width: 100%;

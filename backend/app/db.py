@@ -50,6 +50,22 @@ def get_stats(UserEmail: str):
 
 def update_stats(UserEmail: str, category: str, count: int):
     stats = get_stats(UserEmail)
+    if category not in ['Optional', 'Notable', 'Important', 'Urgent', 'Critical']:
+        print(f"Unknown category '{category}' for stats update.")
+        
+        if category.startswith('Optional'):
+            category = 'Optional'
+        elif category.startswith('Notable'):
+            category = 'Notable'
+        elif category.startswith('Important'):
+            category = 'Important'
+        elif category.startswith('Urgent'):
+            category = 'Urgent'
+        elif category.startswith('Critical'):
+            category = 'Critical'
+        else:
+            return stats
+    
     stats[category] += count
     stats['Total_records'] += count
     db[UserEmail][STATS].update_one({"Email": UserEmail}, {"$set": stats})

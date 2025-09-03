@@ -1,5 +1,5 @@
 DEFAULT_RECORDS_TO_PROCESS = 10;
-DEFAULT_MAIL_CLASS = "optional-reply-color";
+DEFAULT_MAIL_CLASS = "unknown-reply-color";
 SERVER_URL = "http://localhost:8000";
 
 let popupPort = null;
