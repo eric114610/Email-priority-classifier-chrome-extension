@@ -30,25 +30,22 @@ With EPIC, you can:
 ### **Screenshots**
 
 Here’s a quick look at the Email Priority Instant Classifier (EPIC) in action:
-
-<div style="display: flex; gap: 10px; flex-wrap: wrap;">
-
-  <div>
-    <p align="center"><strong>Popup Overview</strong></p>
-    <img src="assets/popup.png" width="200" alt="Popup Overview">
-  </div>
-
-  <div>
-    <p align="center"><strong>Manage Record Page</strong></p>
-    <img src="assets/manage_records.png" width="200" alt="Manage Record Page">
-  </div>
-
-  <div>
-    <p align="center"><strong>Learn More Page</strong></p>
-    <img src="assets/learn_more.png" width="200" alt="Learn More Page">
-  </div>
-
-</div>
+<table>
+  <tr>
+    <td align="center">
+      <img src="assets/popup.png" height="400" width="200" alt="Popup Overview"><br>
+      <strong>Popup Overview</strong>
+    </td>
+    <td align="center">
+      <img src="assets/manage_records.png" height="400" width="200" alt="Manage Record Page"><br>
+      <strong>Manage Record Page</strong>
+    </td>
+    <td align="center">
+      <img src="assets/learn_more.png" height="400" width="200" alt="Learn More Page"><br>
+      <strong>Learn More Page</strong>
+    </td>
+  </tr>
+</table>
 
 ---
 
