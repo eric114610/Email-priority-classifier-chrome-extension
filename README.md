@@ -98,8 +98,8 @@ root/
 
 ### **1. Clone the Repository**  
 ```bash
-git clone https://github.com/your-username/epic-extension.git
-cd epic-extension
+git clone https://github.com/eric114610/Email-priority-classifier-chrome-extension.git
+cd Email-priority-classifier-chrome-extension
 ```
 
 ### **2. Run Backend Locally**  
