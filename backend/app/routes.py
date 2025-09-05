@@ -59,6 +59,7 @@ async def get_mail_class(input: RecordInput):
 
             index_str, MailClass = line.split(':')
             index = int(index_str)
+            MailClass = MailClass.strip()
             MailClasses.append((index, MailClass.strip()))
             save_thread(threads[responseCount], input.UserEmail, MailClass.strip())
             responseCount += 1
