@@ -60,6 +60,19 @@ async def get_mail_class(input: RecordInput):
             index_str, MailClass = line.split(':')
             index = int(index_str)
             MailClass = MailClass.strip()
+
+            if MailClass not in ['Optional', 'Notable', 'Important', 'Urgent', 'Critical']:
+                if MailClass.startswith('Optional'):
+                    MailClass = 'Optional'
+                elif MailClass.startswith('Notable'):
+                    MailClass = 'Notable'
+                elif MailClass.startswith('Important'):
+                    MailClass = 'Important'
+                elif MailClass.startswith('Urgent'):
+                    MailClass = 'Urgent'
+                elif MailClass.startswith('Critical'):
+                    MailClass = 'Critical'
+
             MailClasses.append((index, MailClass.strip()))
             save_thread(threads[responseCount], input.UserEmail, MailClass.strip())
             responseCount += 1
