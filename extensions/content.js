@@ -16,7 +16,7 @@ async function onDomReady() {
     await new Promise(resolve => setTimeout(resolve, 2000));
     console.log("EPIC: DOM is ready, starting content script");
 
-    const userProfileButton = document.querySelector('.gb_B.gb_Za.gb_0');
+    const userProfileButton = document.querySelector('.gb_B.gb_0a.gb_1');
 
     if (userProfileButton) {
         userEmail = userProfileButton.getAttribute('aria-label');

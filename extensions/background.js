@@ -305,7 +305,7 @@ chrome.tabs.onActivated.addListener(activeInfo => {
 });
 
 function retrieveUserEmail() {
-    UserEmail = document.querySelector('.gb_B.gb_Za.gb_0').getAttribute('aria-label');
+    UserEmail = document.querySelector('.gb_B.gb_0a.gb_1').getAttribute('aria-label');
     const start = UserEmail.indexOf('(');
     const end = UserEmail.indexOf('@', start);
 
